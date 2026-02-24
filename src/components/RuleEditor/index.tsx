@@ -9,6 +9,7 @@ type Props = {
 	onSave: (alias: Alias) => void;
 	onBack: () => void;
 	onEditRule: (index: number) => void;
+	onRename: (oldName: string, newName: string) => void;
 };
 
 function formatMatchValue(value: string | string[]): string {
@@ -31,21 +32,32 @@ export default function RuleEditor({
 	onSave,
 	onBack,
 	onEditRule,
+	onRename,
 }: Props) {
 	const [selectedIndex, setSelectedIndex] = useState(0);
-	const [editingFallback, setEditingFallback] = useState(false);
+	const [editingField, setEditingField] = useState<'name' | 'description' | 'fallback' | null>(null);
 	const [editValue, setEditValue] = useState('');
 
-	const isFallbackSelected = selectedIndex === alias.rules.length;
+	const isFallbackSelected = selectedIndex === alias.rules.length + 2;
+	const isInRulesRange = selectedIndex >= 2 && selectedIndex < alias.rules.length + 2;
 
 	useInput((input, key) => {
-		if (editingFallback) {
+		if (editingField !== null) {
 			if (key.return) {
-				const newFallback = editValue === '' ? null : editValue;
-				onSave({ ...alias, fallback: newFallback });
-				setEditingFallback(false);
+				if (editingField === 'name') {
+					const trimmed = editValue.trim();
+					if (trimmed !== '' && trimmed !== aliasName) {
+						onRename(aliasName, trimmed);
+					}
+				} else if (editingField === 'description') {
+					onSave({ ...alias, description: editValue.trim() || undefined });
+				} else if (editingField === 'fallback') {
+					const newFallback = editValue === '' ? null : editValue;
+					onSave({ ...alias, fallback: newFallback });
+				}
+				setEditingField(null);
 			} else if (key.escape) {
-				setEditingFallback(false);
+				setEditingField(null);
 			} else if (key.backspace || key.delete) {
 				setEditValue((prev) => prev.slice(0, -1));
 			} else if (input && !key.ctrl && !key.meta) {
@@ -57,39 +69,48 @@ export default function RuleEditor({
 		if (key.upArrow) {
 			setSelectedIndex((prev) => Math.max(0, prev - 1));
 		} else if (key.downArrow) {
-			setSelectedIndex((prev) => Math.min(alias.rules.length, prev + 1));
+			setSelectedIndex((prev) => Math.min(alias.rules.length + 2, prev + 1));
 		} else if (key.return) {
-			if (isFallbackSelected) {
+			if (selectedIndex === 0) {
+				setEditValue('');
+				setEditingField('name');
+			} else if (selectedIndex === 1) {
+				setEditValue(alias.description ?? '');
+				setEditingField('description');
+			} else if (isFallbackSelected) {
 				setEditValue(alias.fallback ?? '');
-				setEditingFallback(true);
-			} else if (alias.rules.length > 0) {
-				onEditRule(selectedIndex);
+				setEditingField('fallback');
+			} else if (isInRulesRange && alias.rules.length > 0) {
+				onEditRule(selectedIndex - 2);
 			}
-		} else if (input === 'n' && !isFallbackSelected) {
+		} else if (input === 'n' && isInRulesRange) {
 			const newRules = [...alias.rules, { match: {}, command: '' }];
 			onSave({ ...alias, rules: newRules });
 			onEditRule(newRules.length - 1);
-		} else if (input === 'd' && !isFallbackSelected && alias.rules.length > 0) {
-			const newRules = alias.rules.filter((_, i) => i !== selectedIndex);
+		} else if (input === 'd' && isInRulesRange && alias.rules.length > 0) {
+			const ruleIndex = selectedIndex - 2;
+			const newRules = alias.rules.filter((_, i) => i !== ruleIndex);
 			onSave({ ...alias, rules: newRules });
-			setSelectedIndex((prev) => Math.min(prev, newRules.length - 1));
+			setSelectedIndex((prev) => Math.min(prev, newRules.length + 1));
 		} else if (
 			input === 'j' &&
-			!isFallbackSelected &&
-			selectedIndex < alias.rules.length - 1
+			isInRulesRange &&
+			selectedIndex - 2 < alias.rules.length - 1
 		) {
+			const ruleIndex = selectedIndex - 2;
 			const newRules = [...alias.rules];
-			[newRules[selectedIndex], newRules[selectedIndex + 1]] = [
-				newRules[selectedIndex + 1],
-				newRules[selectedIndex],
+			[newRules[ruleIndex], newRules[ruleIndex + 1]] = [
+				newRules[ruleIndex + 1],
+				newRules[ruleIndex],
 			];
 			onSave({ ...alias, rules: newRules });
 			setSelectedIndex((prev) => prev + 1);
-		} else if (input === 'J' && !isFallbackSelected && selectedIndex > 0) {
+		} else if (input === 'J' && isInRulesRange && selectedIndex - 2 > 0) {
+			const ruleIndex = selectedIndex - 2;
 			const newRules = [...alias.rules];
-			[newRules[selectedIndex], newRules[selectedIndex - 1]] = [
-				newRules[selectedIndex - 1],
-				newRules[selectedIndex],
+			[newRules[ruleIndex], newRules[ruleIndex - 1]] = [
+				newRules[ruleIndex - 1],
+				newRules[ruleIndex],
 			];
 			onSave({ ...alias, rules: newRules });
 			setSelectedIndex((prev) => prev - 1);
@@ -98,26 +119,61 @@ export default function RuleEditor({
 		}
 	});
 
-	const fallbackDisplay = editingFallback
+	const fallbackDisplay = editingField === 'fallback'
 		? editValue || ''
 		: alias.fallback ?? '(none)';
 
 	return (
 		<Box flexDirection="column" padding={1}>
-			<Box marginBottom={1}>
-				<Text bold color={COLOR.CYAN}>
-					{aliasName}
+			{/* Name field */}
+			<Box marginBottom={0}>
+				<Text color={selectedIndex === 0 ? COLOR.CYAN : undefined}>
+					{selectedIndex === 0 ? '> ' : '  '}
+					<Text bold>Name: </Text>
+					{editingField === 'name' ? (
+						<Text>
+							{editValue}
+							<Text color={COLOR.CYAN}>{'|'}</Text>
+						</Text>
+					) : (
+						<Text>{aliasName}</Text>
+					)}
 				</Text>
-				{alias.description ? (
-					<Text dimColor> — {alias.description}</Text>
-				) : null}
+			</Box>
+
+			{/* Usage preview */}
+			<Box marginBottom={0}>
+				<Text dimColor>
+					{'    Usage: '}
+					<Text color={COLOR.YELLOW}>
+						rc {(editingField === 'name' ? editValue : aliasName).replace(/\./g, ' ')} [args...]
+					</Text>
+				</Text>
+			</Box>
+
+			{/* Description field */}
+			<Box marginBottom={1}>
+				<Text color={selectedIndex === 1 ? COLOR.CYAN : undefined}>
+					{selectedIndex === 1 ? '> ' : '  '}
+					<Text bold>Description: </Text>
+					{editingField === 'description' ? (
+						<Text>
+							{editValue}
+							<Text color={COLOR.CYAN}>{'|'}</Text>
+						</Text>
+					) : (
+						<Text dimColor={!alias.description}>
+							{alias.description ?? '(none)'}
+						</Text>
+					)}
+				</Text>
 			</Box>
 
 			{alias.rules.length === 0 ? (
 				<Text dimColor>No rules. Press 'n' to add one.</Text>
 			) : (
 				alias.rules.map((rule, index) => {
-					const isSelected = index === selectedIndex;
+					const isSelected = index + 2 === selectedIndex;
 					return (
 						// biome-ignore lint/suspicious/noArrayIndexKey: rules have no stable unique ID
 						<Box key={index} flexDirection="column" marginBottom={1}>
@@ -140,7 +196,7 @@ export default function RuleEditor({
 				<Text color={isFallbackSelected ? COLOR.CYAN : undefined}>
 					{isFallbackSelected ? '> ' : '  '}
 					<Text bold>Fallback: </Text>
-					{editingFallback ? (
+					{editingField === 'fallback' ? (
 						<Text>
 							{editValue}
 							<Text color={COLOR.CYAN}>{'|'}</Text>

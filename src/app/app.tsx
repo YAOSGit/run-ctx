@@ -58,6 +58,16 @@ export default function App() {
 							ruleIndex: index,
 						})
 					}
+					onRename={(oldName, newName) => {
+						const { [oldName]: renamedAlias, ...rest } = config.aliases;
+						if (renamedAlias) {
+							handleSave({
+								...config,
+								aliases: { ...rest, [newName]: renamedAlias },
+							});
+							setScreen({ type: 'rule-editor', aliasName: newName });
+						}
+					}}
 				/>
 			);
 		}

@@ -20,6 +20,7 @@ describe('RuleEditor', () => {
 				onSave={vi.fn()}
 				onBack={vi.fn()}
 				onEditRule={vi.fn()}
+				onRename={vi.fn()}
 			/>,
 		);
 		expect(lastFrame()).toContain('dev');
@@ -33,6 +34,7 @@ describe('RuleEditor', () => {
 				onSave={vi.fn()}
 				onBack={vi.fn()}
 				onEditRule={vi.fn()}
+				onRename={vi.fn()}
 			/>,
 		);
 		expect(lastFrame()).toContain('npm run dev');
@@ -47,6 +49,7 @@ describe('RuleEditor', () => {
 				onSave={vi.fn()}
 				onBack={vi.fn()}
 				onEditRule={vi.fn()}
+				onRename={vi.fn()}
 			/>,
 		);
 		expect(lastFrame()).toContain('package.json');
@@ -65,6 +68,7 @@ describe('RuleEditor', () => {
 				onSave={vi.fn()}
 				onBack={vi.fn()}
 				onEditRule={vi.fn()}
+				onRename={vi.fn()}
 			/>,
 		);
 		expect(lastFrame()).toContain('Fallback');
@@ -79,6 +83,7 @@ describe('RuleEditor', () => {
 				onSave={vi.fn()}
 				onBack={vi.fn()}
 				onEditRule={vi.fn()}
+				onRename={vi.fn()}
 			/>,
 		);
 		expect(lastFrame()).toContain('Fallback');
@@ -101,8 +106,97 @@ describe('RuleEditor', () => {
 				onSave={vi.fn()}
 				onBack={vi.fn()}
 				onEditRule={vi.fn()}
+				onRename={vi.fn()}
 			/>,
 		);
 		expect(lastFrame()).toContain('package.json, pnpm-lock.yaml');
+	});
+
+	it('calls onRename when alias name is edited', async () => {
+		const delay = () => new Promise((r) => setTimeout(r, 50));
+		const onRename = vi.fn();
+		const { stdin } = render(
+			<RuleEditor
+				aliasName="dev"
+				alias={alias}
+				onSave={vi.fn()}
+				onBack={vi.fn()}
+				onEditRule={vi.fn()}
+				onRename={onRename}
+			/>,
+		);
+		await delay();
+		// Name is selected by default (index 0), press Enter to edit
+		stdin.write('\r');
+		await delay();
+		// Type new name
+		stdin.write('start');
+		await delay();
+		// Press Enter to confirm
+		stdin.write('\r');
+		await delay();
+		expect(onRename).toHaveBeenCalledWith('dev', 'start');
+	});
+
+	it('calls onSave with updated description when description is edited', async () => {
+		const delay = () => new Promise((r) => setTimeout(r, 50));
+		const onSave = vi.fn();
+		const { stdin } = render(
+			<RuleEditor
+				aliasName="dev"
+				alias={alias}
+				onSave={onSave}
+				onBack={vi.fn()}
+				onEditRule={vi.fn()}
+				onRename={vi.fn()}
+			/>,
+		);
+		await delay();
+		// Navigate down to Description (index 1)
+		stdin.write('\u001B[B');
+		await delay();
+		// Press Enter to edit
+		stdin.write('\r');
+		await delay();
+		// Clear existing text ("Start dev server" = 16 chars)
+		for (let i = 0; i < 16; i++) stdin.write('\u007F');
+		await delay();
+		stdin.write('Run development mode');
+		await delay();
+		// Confirm
+		stdin.write('\r');
+		await delay();
+		expect(onSave).toHaveBeenCalledWith(
+			expect.objectContaining({ description: 'Run development mode' }),
+		);
+	});
+
+	it('shows usage preview with dot notation expanded to spaces', () => {
+		const dotAlias: Alias = { rules: [], description: 'Nested command' };
+		const { lastFrame } = render(
+			<RuleEditor
+				aliasName="dev.server"
+				alias={dotAlias}
+				onSave={vi.fn()}
+				onBack={vi.fn()}
+				onEditRule={vi.fn()}
+				onRename={vi.fn()}
+			/>,
+		);
+		expect(lastFrame()).toContain('rc dev server [args...]');
+	});
+
+	it('shows usage preview for simple alias name', () => {
+		const { lastFrame } = render(
+			<RuleEditor
+				aliasName="dev"
+				alias={alias}
+				onSave={vi.fn()}
+				onBack={vi.fn()}
+				onEditRule={vi.fn()}
+				onRename={vi.fn()}
+			/>,
+		);
+		expect(lastFrame()).toContain('rc dev [args...]');
 	});
 });
