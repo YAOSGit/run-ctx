@@ -1,6 +1,7 @@
 import { Box, Text, useInput } from 'ink';
 import { useState } from 'react';
 import type { Alias } from '../../types/Alias/index.js';
+import { COLOR } from '../../types/Color/index.js';
 
 type Props = {
 	aliasName: string;
@@ -104,29 +105,29 @@ export default function RuleEditor({
 	return (
 		<Box flexDirection="column" padding={1}>
 			<Box marginBottom={1}>
-				<Text bold color="cyan">
+				<Text bold color={COLOR.CYAN}>
 					{aliasName}
 				</Text>
 				{alias.description ? (
-					<Text color="gray"> — {alias.description}</Text>
+					<Text dimColor> — {alias.description}</Text>
 				) : null}
 			</Box>
 
 			{alias.rules.length === 0 ? (
-				<Text color="gray">No rules. Press 'n' to add one.</Text>
+				<Text dimColor>No rules. Press 'n' to add one.</Text>
 			) : (
 				alias.rules.map((rule, index) => {
 					const isSelected = index === selectedIndex;
 					return (
 						// biome-ignore lint/suspicious/noArrayIndexKey: rules have no stable unique ID
 						<Box key={index} flexDirection="column" marginBottom={1}>
-							<Text color={isSelected ? 'cyan' : undefined}>
+							<Text color={isSelected ? COLOR.CYAN : undefined}>
 								{isSelected ? '> ' : '  '}
 								<Text bold>
 									{'\u2192'} {rule.command || '(empty command)'}
 								</Text>
 							</Text>
-							<Text color="gray">
+							<Text dimColor>
 								{'    '}
 								when: {formatMatch(rule.match) || '(no conditions)'}
 							</Text>
@@ -136,26 +137,41 @@ export default function RuleEditor({
 			)}
 
 			<Box marginBottom={1}>
-				<Text color={isFallbackSelected ? 'cyan' : undefined}>
+				<Text color={isFallbackSelected ? COLOR.CYAN : undefined}>
 					{isFallbackSelected ? '> ' : '  '}
 					<Text bold>Fallback: </Text>
 					{editingFallback ? (
 						<Text>
 							{editValue}
-							<Text color="cyan">{'|'}</Text>
+							<Text color={COLOR.CYAN}>{'|'}</Text>
 						</Text>
 					) : (
-						<Text color={alias.fallback ? undefined : 'gray'}>
+						<Text dimColor={!alias.fallback}>
 							{fallbackDisplay}
 						</Text>
 					)}
 				</Text>
 			</Box>
 
-			<Box marginTop={1} borderStyle="single" borderColor="gray" paddingX={1}>
-				<Text color="gray">
-					{'\u2191\u2193'} navigate {'\u00B7'} Enter edit {'\u00B7'} n new{' '}
-					{'\u00B7'} d delete {'\u00B7'} j/J reorder {'\u00B7'} q/Esc back
+			<Box marginTop={1} borderStyle="round" borderColor={COLOR.GRAY} paddingX={1}>
+				<Text wrap="end">
+					<Text bold color={COLOR.MAGENTA}>
+						YAOSGit
+						<Text dimColor> : </Text>
+						ctx
+					</Text>
+					<Text dimColor> │ </Text>
+					<Text bold>↑↓</Text> navigate
+					<Text dimColor> │ </Text>
+					<Text bold>Enter</Text> edit
+					<Text dimColor> │ </Text>
+					<Text bold>n</Text> new
+					<Text dimColor> │ </Text>
+					<Text bold>d</Text> delete
+					<Text dimColor> │ </Text>
+					<Text bold>j/J</Text> reorder
+					<Text dimColor> │ </Text>
+					<Text bold>q/Esc</Text> back
 				</Text>
 			</Box>
 		</Box>

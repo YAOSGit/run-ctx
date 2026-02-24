@@ -1,15 +1,48 @@
-<h1 align="center">run-ctx</h1>
+<h1 align="center">Yet another Open Source run-ctx</h1>
 
 <p align="center">
-  <strong>Context-aware command aliasing for your terminal</strong>
+  <strong>Context-aware command aliasing for your terminal — run the right command based on cwd, files, and env vars</strong>
 </p>
 
 <div align="center">
 
 ![Node Version](https://img.shields.io/badge/NODE-18+-16161D?style=for-the-badge&logo=nodedotjs&logoColor=white&labelColor=%235FA04E)
 ![TypeScript Version](https://img.shields.io/badge/TYPESCRIPT-5.9-16161D?style=for-the-badge&logo=typescript&logoColor=white&labelColor=%233178C6)
+![React Version](https://img.shields.io/badge/REACT-19.2-16161D?style=for-the-badge&logo=react&logoColor=black&labelColor=%2361DAFB)
+
+![Uses Ink](https://img.shields.io/badge/INK-16161D?style=for-the-badge&logo=react&logoColor=white&labelColor=%2361DAFB)
+![Uses Vitest](https://img.shields.io/badge/VITEST-16161D?style=for-the-badge&logo=vitest&logoColor=white&labelColor=%236E9F18)
+![Uses Biome](https://img.shields.io/badge/BIOME-16161D?style=for-the-badge&logo=biome&logoColor=white&labelColor=%2360A5FA)
 
 </div>
+
+---
+
+## Table of Contents
+
+### Getting Started
+
+- [Overview](#overview)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [CLI Usage](#cli-usage)
+
+### Configuration
+
+- [Config Format](#config-format)
+- [Match Conditions](#match-conditions)
+- [Specificity Scoring](#specificity-scoring)
+- [Config Example](#config-example)
+
+### TUI Editor
+
+- [TUI Editor](#tui-editor)
+
+### Development
+
+- [Available Scripts](#available-scripts)
+- [Tech Stack](#tech-stack)
+- [Project Structure](#project-structure)
 
 ---
 
@@ -32,12 +65,40 @@ run-ctx dev  # --> cargo watch -x run
 
 No more remembering which command goes with which project.
 
+### What Makes This Project Unique
+
+- **Context-Aware**: Automatically detects project type via files, cwd, and env vars
+- **Specificity Scoring**: Multi-condition rules with CSS-style cascade resolution
+- **TUI Editor**: Interactive terminal UI for managing aliases and rules
+- **Zero Config Per-Project**: One global config works across all your projects
+
 ---
 
 ## Installation
 
 ```bash
+# Install globally from npm
 npm install -g run-ctx
+
+# Or install as a dev dependency
+npm install -D run-ctx
+```
+
+### From Source
+
+```bash
+# Clone the repository
+git clone https://github.com/YAOSGit/run-ctx.git
+cd run-ctx
+
+# Install dependencies
+npm install
+
+# Build the project
+npm run build
+
+# Link globally (optional)
+npm link
 ```
 
 ---
@@ -276,12 +337,114 @@ A realistic config for a polyglot developer:
 
 ---
 
+## Available Scripts
+
+### Development Scripts
+
+| Script | Description |
+|--------|-------------|
+| `npm run dev` | Run tests in watch mode |
+| `npm run dev:typescript` | Run TypeScript type checking in watch mode |
+
+### Build Scripts
+
+| Script | Description |
+|--------|-------------|
+| `npm run build` | Bundle the CLI with esbuild |
+
+### Lint Scripts
+
+| Script | Description |
+|--------|-------------|
+| `npm run lint` | Run type checking, linting, formatting, and audit |
+| `npm run lint:check` | Check code for linting issues with Biome |
+| `npm run lint:fix` | Check and fix linting issues with Biome |
+| `npm run lint:format` | Format all files with Biome |
+| `npm run lint:types` | Run TypeScript type checking only |
+| `npm run lint:audit` | Run npm audit |
+
+### Testing Scripts
+
+| Script | Description |
+|--------|-------------|
+| `npm test` | Run all tests (unit, react) |
+| `npm run test:unit` | Run unit tests |
+| `npm run test:react` | Run React component tests |
+
+---
+
 ## Tech Stack
 
-- **[TypeScript](https://www.typescriptlang.org/)** -- Type-safe implementation
-- **[Ink](https://github.com/vadimdemedes/ink)** -- React for terminal UIs (TUI editor)
-- **[Commander](https://github.com/tj/commander.js)** -- CLI argument parsing
-- **[esbuild](https://esbuild.github.io/)** -- Fast bundler
+### Core
+
+- **[React 19](https://react.dev/)** - UI component library
+- **[Ink 6](https://github.com/vadimdemedes/ink)** - React for CLIs
+- **[TypeScript 5](https://www.typescriptlang.org/)** - Type-safe JavaScript
+- **[Commander](https://github.com/tj/commander.js)** - CLI argument parsing
+
+### Build & Development
+
+- **[esbuild](https://esbuild.github.io/)** - Fast bundler
+- **[Vitest](https://vitest.dev/)** - Unit testing framework
+- **[Biome](https://biomejs.dev/)** - Linter and formatter
+
+### UI Components
+
+- **[@inkjs/ui](https://github.com/vadimdemedes/ink-ui)** - Ink UI components
+- **[Chalk](https://github.com/chalk/chalk)** - Terminal string styling
+
+---
+
+## Project Structure
+
+```
+run-ctx/
+├── src/
+│   ├── app/                    # Application entry points
+│   │   ├── cli.ts              # CLI entry point
+│   │   ├── editor-cli.tsx      # TUI editor entry point
+│   │   └── app.tsx             # Main application component
+│   ├── components/             # React components
+│   │   ├── AliasList/          # Home screen - list all aliases
+│   │   ├── RuleEditor/         # Edit rules for an alias
+│   │   └── RuleDetail/         # Edit individual rule fields
+│   ├── types/                  # TypeScript type definitions
+│   │   ├── Alias/              # Alias type definitions
+│   │   ├── Color/              # Color constants and types
+│   │   ├── Config/             # Config type definitions
+│   │   └── Rule/               # Rule type definitions
+│   └── utils/                  # Utility functions
+│       ├── config/             # Load/save config from ~/.config/run-ctx
+│       ├── executor/           # Execute resolved commands
+│       ├── matcher/            # Match rules based on conditions
+│       └── resolver/           # Resolve alias to command
+├── docs/                       # Documentation and plans
+├── dist/                       # Built output
+├── biome.json                  # Biome configuration
+├── tsconfig.json               # TypeScript configuration
+├── tsconfig.app.json           # App TypeScript configuration
+├── vitest.unit.config.ts       # Unit test configuration
+├── vitest.react.config.ts      # React test configuration
+├── esbuild.config.js           # esbuild bundler configuration
+└── package.json
+```
+
+---
+
+## Versioning
+
+This project uses a custom versioning scheme: `MAJORYY.MINOR.PATCH`
+
+| Part | Description | Example |
+|------|-------------|---------|
+| `MAJOR` | Major version number | `1` |
+| `YY` | Year (last 2 digits) | `26` for 2026 |
+| `MINOR` | Minor version | `0` |
+| `PATCH` | Patch version | `0` |
+
+**Example:** `126.0.0` = Major version 1, released in 2026, minor 0, patch 0
+
+This format allows you to quickly identify both the major version and the year of release at a glance.
 
 ---
 

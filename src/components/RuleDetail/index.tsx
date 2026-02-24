@@ -1,5 +1,6 @@
 import { Box, Text, useInput } from 'ink';
 import { useState } from 'react';
+import { COLOR } from '../../types/Color/index.js';
 import type { MatchCondition, Rule } from '../../types/Rule/index.js';
 
 type Props = {
@@ -131,7 +132,7 @@ export default function RuleDetail({ rule, onSave, onBack }: Props) {
 	return (
 		<Box flexDirection="column" padding={1}>
 			<Box marginBottom={1}>
-				<Text bold color="cyan">
+				<Text bold color={COLOR.CYAN}>
 					Edit Rule
 				</Text>
 			</Box>
@@ -143,7 +144,7 @@ export default function RuleDetail({ rule, onSave, onBack }: Props) {
 				return (
 					<Box key={field.key} flexDirection="column" marginBottom={1}>
 						<Box>
-							<Text color={isActiveField ? 'cyan' : 'white'}>
+							<Text color={isActiveField ? COLOR.CYAN : COLOR.WHITE}>
 								{isActiveField ? '> ' : '  '}
 								<Text bold>{field.label}: </Text>
 							</Text>
@@ -151,7 +152,7 @@ export default function RuleDetail({ rule, onSave, onBack }: Props) {
 
 						{fieldEntries.length === 0 ? (
 							<Box>
-								<Text color="gray">{'    (empty)'}</Text>
+								<Text dimColor>{'    (empty)'}</Text>
 							</Box>
 						) : (
 							fieldEntries.map((entry, entryIndex) => {
@@ -162,13 +163,13 @@ export default function RuleDetail({ rule, onSave, onBack }: Props) {
 
 								return (
 									<Box key={`${field.key}-${entryIndex}`}>
-										<Text color={isActiveEntry ? 'green' : 'white'}>
+										<Text color={isActiveEntry ? COLOR.GREEN : COLOR.WHITE}>
 											{'    '}
 											{showNumber ? `${entryIndex + 1}. ` : ''}
 											{isEditing ? (
 												<>
-													<Text color="green">{editValue}</Text>
-													<Text color="gray">|</Text>
+													<Text color={COLOR.GREEN}>{editValue}</Text>
+													<Text dimColor>|</Text>
 												</>
 											) : (
 												<Text>{entry || '(empty)'}</Text>
@@ -180,7 +181,7 @@ export default function RuleDetail({ rule, onSave, onBack }: Props) {
 						)}
 
 						{isActiveField && !editing ? (
-							<Text color="gray">
+							<Text dimColor>
 								{'    '}
 								{field.hint}
 							</Text>
@@ -189,10 +190,23 @@ export default function RuleDetail({ rule, onSave, onBack }: Props) {
 				);
 			})}
 
-			<Box marginTop={1} borderStyle="single" borderColor="gray" paddingX={1}>
-				<Text color="gray">
-					{'\u2191\u2193'} navigate {'\u00B7'} Enter edit {'\u00B7'} a add {'\u00B7'} d
-					delete {'\u00B7'} Esc back
+			<Box marginTop={1} borderStyle="round" borderColor={COLOR.GRAY} paddingX={1}>
+				<Text wrap="end">
+					<Text bold color={COLOR.MAGENTA}>
+						YAOSGit
+						<Text dimColor> : </Text>
+						ctx
+					</Text>
+					<Text dimColor> │ </Text>
+					<Text bold>↑↓</Text> navigate
+					<Text dimColor> │ </Text>
+					<Text bold>Enter</Text> edit
+					<Text dimColor> │ </Text>
+					<Text bold>a</Text> add
+					<Text dimColor> │ </Text>
+					<Text bold>d</Text> delete
+					<Text dimColor> │ </Text>
+					<Text bold>Esc</Text> back
 				</Text>
 			</Box>
 		</Box>

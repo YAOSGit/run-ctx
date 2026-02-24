@@ -1,6 +1,7 @@
 import { Box, Text, useApp, useInput } from 'ink';
 import { useState } from 'react';
 import type { Config } from '../../types/Config/index.js';
+import { COLOR } from '../../types/Color/index.js';
 
 type Props = {
 	config: Config;
@@ -62,14 +63,14 @@ export default function AliasList({ config, onSave, onEditAlias }: Props) {
 	return (
 		<Box flexDirection="column" padding={1}>
 			<Box marginBottom={1}>
-				<Text bold color="cyan">
+				<Text bold color={COLOR.CYAN}>
 					run-ctx editor
 				</Text>
-				<Text color="gray"> — Manage your command aliases</Text>
+				<Text dimColor> — Manage your command aliases</Text>
 			</Box>
 
 			{aliasNames.length === 0 ? (
-				<Text color="gray">
+				<Text dimColor>
 					No aliases configured. Press 'n' to create one.
 				</Text>
 			) : (
@@ -80,13 +81,13 @@ export default function AliasList({ config, onSave, onEditAlias }: Props) {
 
 					return (
 						<Box key={name}>
-							<Text color={isSelected ? 'cyan' : undefined}>
+							<Text color={isSelected ? COLOR.CYAN : undefined}>
 								{isSelected ? '> ' : '  '}
 								<Text bold>{name}</Text>
 								{alias.description ? (
-									<Text color="gray"> — {alias.description}</Text>
+									<Text dimColor> — {alias.description}</Text>
 								) : null}
-								<Text color="yellow">
+								<Text color={COLOR.YELLOW}>
 									{' '}
 									({ruleCount} rule{ruleCount !== 1 ? 's' : ''})
 								</Text>
@@ -98,14 +99,30 @@ export default function AliasList({ config, onSave, onEditAlias }: Props) {
 
 			{isCreating ? (
 				<Box marginTop={1}>
-					<Text color="green">New alias name: </Text>
+					<Text color={COLOR.GREEN}>New alias name: </Text>
 					<Text>{newName}</Text>
-					<Text color="gray">|</Text>
+					<Text dimColor>|</Text>
 				</Box>
 			) : null}
 
-			<Box marginTop={1} borderStyle="single" borderColor="gray" paddingX={1}>
-				<Text color="gray">navigate Enter edit n new d delete q quit</Text>
+			<Box marginTop={1} borderStyle="round" borderColor={COLOR.GRAY} paddingX={1}>
+				<Text wrap="end">
+					<Text bold color={COLOR.MAGENTA}>
+						YAOSGit
+						<Text dimColor> : </Text>
+						ctx
+					</Text>
+					<Text dimColor> │ </Text>
+					<Text bold>↑↓</Text> navigate
+					<Text dimColor> │ </Text>
+					<Text bold>Enter</Text> edit
+					<Text dimColor> │ </Text>
+					<Text bold>n</Text> new
+					<Text dimColor> │ </Text>
+					<Text bold>d</Text> delete
+					<Text dimColor> │ </Text>
+					<Text bold>q</Text> quit
+				</Text>
 			</Box>
 		</Box>
 	);
