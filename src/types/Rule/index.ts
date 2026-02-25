@@ -10,4 +10,5 @@ export type MatchCondition = {
 export type Rule = {
 	match: MatchCondition;
 	command: string;
+	shell?: boolean;
 };

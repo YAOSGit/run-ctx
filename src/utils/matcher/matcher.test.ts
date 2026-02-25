@@ -19,53 +19,74 @@ describe('matcher', () => {
 	describe('evaluateRule', () => {
 		it('matches when file exists in cwd (glob)', () => {
 			fs.writeFileSync(path.join(tmpDir, 'package.json'), '{}');
-			const rule: Rule = { match: { file: 'package.json' }, command: 'npm run dev' };
+			const rule: Rule = {
+				match: { file: 'package.json' },
+				command: 'npm run dev',
+			};
 			const result = evaluateRule(rule, tmpDir, process.env);
-			expect(result).toEqual({ matched: true, score: 1 });
+			expect(result).toMatchObject({ matched: true, score: [0, 0, 1] });
 		});
 
 		it('does not match when file is absent', () => {
-			const rule: Rule = { match: { file: 'package.json' }, command: 'npm run dev' };
+			const rule: Rule = {
+				match: { file: 'package.json' },
+				command: 'npm run dev',
+			};
 			const result = evaluateRule(rule, tmpDir, process.env);
-			expect(result).toEqual({ matched: false, score: 0 });
+			expect(result).toMatchObject({ matched: false, score: [0, 0, 0] });
 		});
 
 		it('matches cwd with regex', () => {
-			const rule: Rule = { match: { cwd: '.*run-ctx-matcher' }, command: 'echo hi' };
+			const rule: Rule = {
+				match: { cwd: '.*run-ctx-matcher' },
+				command: 'echo hi',
+			};
 			const result = evaluateRule(rule, tmpDir, process.env);
-			expect(result).toEqual({ matched: true, score: 1 });
+			expect(result).toMatchObject({ matched: true, score: [0, 1, 0] });
 		});
 
 		it('does not match cwd when regex fails', () => {
-			const rule: Rule = { match: { cwd: '/nonexistent/.*' }, command: 'echo hi' };
+			const rule: Rule = {
+				match: { cwd: '/nonexistent/.*' },
+				command: 'echo hi',
+			};
 			const result = evaluateRule(rule, tmpDir, process.env);
-			expect(result).toEqual({ matched: false, score: 0 });
+			expect(result).toMatchObject({ matched: false, score: [0, 0, 0] });
 		});
 
 		it('matches when env var is set', () => {
 			const rule: Rule = { match: { env: 'HOME' }, command: 'echo hi' };
 			const result = evaluateRule(rule, tmpDir, process.env);
-			expect(result).toEqual({ matched: true, score: 1 });
+			expect(result).toMatchObject({ matched: true, score: [1, 0, 0] });
 		});
 
 		it('does not match when env var is not set', () => {
-			const rule: Rule = { match: { env: 'UNLIKELY_VAR_12345' }, command: 'echo hi' };
+			const rule: Rule = {
+				match: { env: 'UNLIKELY_VAR_12345' },
+				command: 'echo hi',
+			};
 			const result = evaluateRule(rule, tmpDir, {});
-			expect(result).toEqual({ matched: false, score: 0 });
+			expect(result).toMatchObject({ matched: false, score: [0, 0, 0] });
 		});
 
 		it('scores multiple conditions (2 points for file + env)', () => {
 			fs.writeFileSync(path.join(tmpDir, 'package.json'), '{}');
-			const rule: Rule = { match: { file: 'package.json', env: 'HOME' }, command: 'npm test' };
+			const rule: Rule = {
+				match: { file: 'package.json', env: 'HOME' },
+				command: 'npm test',
+			};
 			const result = evaluateRule(rule, tmpDir, process.env);
-			expect(result).toEqual({ matched: true, score: 2 });
+			expect(result).toMatchObject({ matched: true, score: [1, 0, 1] });
 		});
 
 		it('fails if any condition misses (partial match)', () => {
-			const rule: Rule = { match: { file: 'package.json', env: 'HOME' }, command: 'npm test' };
+			const rule: Rule = {
+				match: { file: 'package.json', env: 'HOME' },
+				command: 'npm test',
+			};
 			// file does not exist
 			const result = evaluateRule(rule, tmpDir, process.env);
-			expect(result).toEqual({ matched: false, score: 0 });
+			expect(result).toMatchObject({ matched: false, score: [0, 0, 0] });
 		});
 
 		describe('array conditions (AND)', () => {
@@ -77,7 +98,7 @@ describe('matcher', () => {
 					command: 'pnpm dev',
 				};
 				const result = evaluateRule(rule, tmpDir, process.env);
-				expect(result).toEqual({ matched: true, score: 2 });
+				expect(result).toMatchObject({ matched: true, score: [0, 0, 2] });
 			});
 
 			it('fails when one file pattern is missing (AND)', () => {
@@ -87,7 +108,7 @@ describe('matcher', () => {
 					command: 'pnpm dev',
 				};
 				const result = evaluateRule(rule, tmpDir, process.env);
-				expect(result).toEqual({ matched: false, score: 0 });
+				expect(result).toMatchObject({ matched: false, score: [0, 0, 0] });
 			});
 
 			it('matches when all cwd patterns match (AND)', () => {
@@ -96,7 +117,7 @@ describe('matcher', () => {
 					command: 'echo hi',
 				};
 				const result = evaluateRule(rule, tmpDir, process.env);
-				expect(result).toEqual({ matched: true, score: 2 });
+				expect(result).toMatchObject({ matched: true, score: [0, 2, 0] });
 			});
 
 			it('fails when one cwd pattern does not match (AND)', () => {
@@ -105,7 +126,7 @@ describe('matcher', () => {
 					command: 'echo hi',
 				};
 				const result = evaluateRule(rule, tmpDir, process.env);
-				expect(result).toEqual({ matched: false, score: 0 });
+				expect(result).toMatchObject({ matched: false, score: [0, 0, 0] });
 			});
 
 			it('matches when all env vars are set (AND)', () => {
@@ -114,7 +135,7 @@ describe('matcher', () => {
 					command: 'echo hi',
 				};
 				const result = evaluateRule(rule, tmpDir, process.env);
-				expect(result).toEqual({ matched: true, score: 2 });
+				expect(result).toMatchObject({ matched: true, score: [2, 0, 0] });
 			});
 
 			it('fails when one env var is missing (AND)', () => {
@@ -123,7 +144,7 @@ describe('matcher', () => {
 					command: 'echo hi',
 				};
 				const result = evaluateRule(rule, tmpDir, {});
-				expect(result).toEqual({ matched: false, score: 0 });
+				expect(result).toMatchObject({ matched: false, score: [0, 0, 0] });
 			});
 
 			it('scores array + single across condition types', () => {
@@ -134,16 +155,16 @@ describe('matcher', () => {
 					command: 'pnpm dev',
 				};
 				const result = evaluateRule(rule, tmpDir, process.env);
-				expect(result).toEqual({ matched: true, score: 3 });
+				expect(result).toMatchObject({ matched: true, score: [1, 0, 2] });
 			});
 
-			it('treats empty array as no condition (no match)', () => {
+			it('treats empty array as a catch-all match', () => {
 				const rule: Rule = {
 					match: { file: [] },
 					command: 'echo hi',
 				};
 				const result = evaluateRule(rule, tmpDir, process.env);
-				expect(result).toEqual({ matched: false, score: 0 });
+				expect(result).toMatchObject({ matched: true, score: [0, 0, 0] });
 			});
 		});
 	});
@@ -153,10 +174,17 @@ describe('matcher', () => {
 			fs.writeFileSync(path.join(tmpDir, 'package.json'), '{}');
 			const rules: Rule[] = [
 				{ match: { file: 'package.json' }, command: 'npm run dev' },
-				{ match: { file: 'package.json', env: 'HOME' }, command: 'npm run dev:full' },
+				{
+					match: { file: 'package.json', env: 'HOME' },
+					command: 'npm run dev:full',
+				},
 			];
 			const result = findBestMatch(rules, tmpDir, process.env);
-			expect(result).toEqual({ command: 'npm run dev:full', rule: rules[1], score: 2 });
+			expect(result).toEqual({
+				command: 'npm run dev:full',
+				rule: rules[1],
+				score: [1, 0, 1],
+			});
 		});
 
 		it('on tie, later rule wins', () => {
@@ -168,6 +196,36 @@ describe('matcher', () => {
 			];
 			const result = findBestMatch(rules, tmpDir, process.env);
 			expect(result?.command).toBe('second');
+		});
+
+		it('prefers latter rule on tie (CSS-style specificity)', () => {
+			const rules: Rule[] = [
+				{ match: { env: 'BAZ' }, command: 'echo first' }, // Score 10000
+				{ match: { env: 'FOO' }, command: 'echo second' }, // Score 10000
+			];
+
+			fs.writeFileSync(path.join(tmpDir, 'test.txt'), '');
+			const match = findBestMatch(rules, tmpDir, { FOO: 'bar' });
+			expect(match?.command).toBe('echo second');
+		});
+
+		it('T7: handles unreadable cwd gracefully without crashing', () => {
+			const rules: Rule[] = [
+				{ match: { file: '*.txt' }, command: 'echo first' },
+			];
+
+			// Create a directory, make it unreadable
+			const unreadableDir = path.join(tmpDir, 'unreadable');
+			fs.mkdirSync(unreadableDir);
+
+			try {
+				// We can just simulate fs.readdirSync throwing instead of messing with OS permissions as they are flaky across OS
+				const renameDir = path.join(tmpDir, 'does-not-exist');
+				const match = findBestMatch(rules, renameDir, {});
+				expect(match).toBeNull(); // Shouldn't crash and won't match anything
+			} finally {
+				fs.rmSync(unreadableDir, { recursive: true, force: true });
+			}
 		});
 
 		it('returns null when no rules match', () => {
@@ -188,10 +246,17 @@ describe('matcher', () => {
 			fs.writeFileSync(path.join(tmpDir, 'pnpm-lock.yaml'), '');
 			const rules: Rule[] = [
 				{ match: { file: 'package.json' }, command: 'npm run dev' },
-				{ match: { file: ['package.json', 'pnpm-lock.yaml'] }, command: 'pnpm dev' },
+				{
+					match: { file: ['package.json', 'pnpm-lock.yaml'] },
+					command: 'pnpm dev',
+				},
 			];
 			const result = findBestMatch(rules, tmpDir, process.env);
-			expect(result).toEqual({ command: 'pnpm dev', rule: rules[1], score: 2 });
+			expect(result).toEqual({
+				command: 'pnpm dev',
+				rule: rules[1],
+				score: [0, 0, 2],
+			});
 		});
 	});
 });

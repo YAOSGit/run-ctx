@@ -1,16 +1,8 @@
 import { Box, Text, useInput } from 'ink';
 import { useState } from 'react';
-import type { Alias } from '../../types/Alias/index.js';
 import { COLOR } from '../../types/Color/index.js';
-
-type Props = {
-	aliasName: string;
-	alias: Alias;
-	onSave: (alias: Alias) => void;
-	onBack: () => void;
-	onEditRule: (index: number) => void;
-	onRename: (oldName: string, newName: string) => void;
-};
+import StatusBar from '../StatusBar/index.js';
+import type { RuleEditorProps } from './RuleEditor.types.js';
 
 function formatMatchValue(value: string | string[]): string {
 	return Array.isArray(value) ? value.join(', ') : value;
@@ -33,13 +25,19 @@ export default function RuleEditor({
 	onBack,
 	onEditRule,
 	onRename,
-}: Props) {
+}: RuleEditorProps) {
 	const [selectedIndex, setSelectedIndex] = useState(0);
-	const [editingField, setEditingField] = useState<'name' | 'description' | 'fallback' | null>(null);
+	const [editingField, setEditingField] = useState<
+		'name' | 'description' | 'fallback' | null
+	>(null);
 	const [editValue, setEditValue] = useState('');
+	const [deleteConfirmRuleIndex, setDeleteConfirmRuleIndex] = useState<
+		number | null
+	>(null);
 
 	const isFallbackSelected = selectedIndex === alias.rules.length + 2;
-	const isInRulesRange = selectedIndex >= 2 && selectedIndex < alias.rules.length + 2;
+	const isInRulesRange =
+		selectedIndex >= 2 && selectedIndex < alias.rules.length + 2;
 
 	useInput((input, key) => {
 		if (editingField !== null) {
@@ -52,8 +50,10 @@ export default function RuleEditor({
 				} else if (editingField === 'description') {
 					onSave({ ...alias, description: editValue.trim() || undefined });
 				} else if (editingField === 'fallback') {
-					const newFallback = editValue === '' ? null : editValue;
-					onSave({ ...alias, fallback: newFallback });
+					onSave({
+						...alias,
+						fallback: editValue === '' ? undefined : editValue,
+					});
 				}
 				setEditingField(null);
 			} else if (key.escape) {
@@ -66,13 +66,25 @@ export default function RuleEditor({
 			return;
 		}
 
+		if (deleteConfirmRuleIndex !== null) {
+			if (input === 'y' || input === 'Y') {
+				const newRules = alias.rules.filter(
+					(_, i) => i !== deleteConfirmRuleIndex,
+				);
+				onSave({ ...alias, rules: newRules });
+				setSelectedIndex((prev) => Math.min(prev, newRules.length + 1));
+			}
+			setDeleteConfirmRuleIndex(null);
+			return;
+		}
+
 		if (key.upArrow) {
 			setSelectedIndex((prev) => Math.max(0, prev - 1));
 		} else if (key.downArrow) {
 			setSelectedIndex((prev) => Math.min(alias.rules.length + 2, prev + 1));
 		} else if (key.return) {
 			if (selectedIndex === 0) {
-				setEditValue('');
+				setEditValue(aliasName);
 				setEditingField('name');
 			} else if (selectedIndex === 1) {
 				setEditValue(alias.description ?? '');
@@ -83,15 +95,12 @@ export default function RuleEditor({
 			} else if (isInRulesRange && alias.rules.length > 0) {
 				onEditRule(selectedIndex - 2);
 			}
-		} else if (input === 'n' && isInRulesRange) {
+		} else if (input === 'n' && !isFallbackSelected && selectedIndex >= 0) {
 			const newRules = [...alias.rules, { match: {}, command: '' }];
 			onSave({ ...alias, rules: newRules });
 			onEditRule(newRules.length - 1);
 		} else if (input === 'd' && isInRulesRange && alias.rules.length > 0) {
-			const ruleIndex = selectedIndex - 2;
-			const newRules = alias.rules.filter((_, i) => i !== ruleIndex);
-			onSave({ ...alias, rules: newRules });
-			setSelectedIndex((prev) => Math.min(prev, newRules.length + 1));
+			setDeleteConfirmRuleIndex(selectedIndex - 2);
 		} else if (
 			input === 'j' &&
 			isInRulesRange &&
@@ -119,9 +128,8 @@ export default function RuleEditor({
 		}
 	});
 
-	const fallbackDisplay = editingField === 'fallback'
-		? editValue || ''
-		: alias.fallback ?? '(none)';
+	const fallbackDisplay =
+		editingField === 'fallback' ? editValue : (alias.fallback ?? '(none)');
 
 	return (
 		<Box flexDirection="column" padding={1}>
@@ -146,7 +154,12 @@ export default function RuleEditor({
 				<Text dimColor>
 					{'    Usage: '}
 					<Text color={COLOR.YELLOW}>
-						rc {(editingField === 'name' ? editValue : aliasName).replace(/\./g, ' ')} [args...]
+						rc{' '}
+						{(editingField === 'name' ? editValue : aliasName).replace(
+							/\./g,
+							' ',
+						)}{' '}
+						[args...]
 					</Text>
 				</Text>
 			</Box>
@@ -185,7 +198,7 @@ export default function RuleEditor({
 							</Text>
 							<Text dimColor>
 								{'    '}
-								when: {formatMatch(rule.match) || '(no conditions)'}
+								when: {formatMatch(rule.match) || '(always match)'}
 							</Text>
 						</Box>
 					);
@@ -202,34 +215,34 @@ export default function RuleEditor({
 							<Text color={COLOR.CYAN}>{'|'}</Text>
 						</Text>
 					) : (
-						<Text dimColor={!alias.fallback}>
-							{fallbackDisplay}
-						</Text>
+						<Text dimColor={!alias.fallback}>{fallbackDisplay}</Text>
 					)}
 				</Text>
 			</Box>
 
-			<Box marginTop={1} borderStyle="round" borderColor={COLOR.GRAY} paddingX={1}>
-				<Text wrap="end">
-					<Text bold color={COLOR.MAGENTA}>
-						YAOSGit
-						<Text dimColor> : </Text>
-						ctx
+			{deleteConfirmRuleIndex !== null ? (
+				<Box marginTop={0} marginBottom={1}>
+					<Text color={COLOR.RED}>Delete rule </Text>
+					<Text color={COLOR.RED} bold>
+						#{deleteConfirmRuleIndex + 1}
 					</Text>
-					<Text dimColor> │ </Text>
-					<Text bold>↑↓</Text> navigate
-					<Text dimColor> │ </Text>
-					<Text bold>Enter</Text> edit
-					<Text dimColor> │ </Text>
-					<Text bold>n</Text> new
-					<Text dimColor> │ </Text>
-					<Text bold>d</Text> delete
-					<Text dimColor> │ </Text>
-					<Text bold>j/J</Text> reorder
-					<Text dimColor> │ </Text>
-					<Text bold>q/Esc</Text> back
-				</Text>
-			</Box>
+					<Text color={COLOR.RED}>? (y/N)</Text>
+				</Box>
+			) : null}
+
+			<StatusBar>
+				<Text bold>↑↓</Text> navigate
+				<Text dimColor> │ </Text>
+				<Text bold>Enter</Text> edit
+				<Text dimColor> │ </Text>
+				<Text bold>n</Text> new
+				<Text dimColor> │ </Text>
+				<Text bold>d</Text> delete
+				<Text dimColor> │ </Text>
+				<Text bold>j/J</Text> reorder
+				<Text dimColor> │ </Text>
+				<Text bold>q/Esc</Text> back
+			</StatusBar>
 		</Box>
 	);
 }

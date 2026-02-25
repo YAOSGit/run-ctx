@@ -2,37 +2,9 @@ import { Box, Text, useInput } from 'ink';
 import { useState } from 'react';
 import { COLOR } from '../../types/Color/index.js';
 import type { MatchCondition, Rule } from '../../types/Rule/index.js';
-
-type Props = {
-	rule: Rule;
-	onSave: (rule: Rule) => void;
-	onBack: () => void;
-};
-
-type Field = 'command' | 'file' | 'cwd' | 'env';
-
-const FIELDS: { key: Field; label: string; hint: string }[] = [
-	{
-		key: 'command',
-		label: 'command',
-		hint: 'The command to execute (e.g. npm run dev)',
-	},
-	{
-		key: 'file',
-		label: 'file (glob)',
-		hint: 'File pattern to check in cwd. [a]dd [d]elete [Enter]edit',
-	},
-	{
-		key: 'cwd',
-		label: 'cwd (regex)',
-		hint: 'Regex to match against cwd path. [a]dd [d]elete [Enter]edit',
-	},
-	{
-		key: 'env',
-		label: 'env var',
-		hint: 'Environment variable that must be set. [a]dd [d]elete [Enter]edit',
-	},
-];
+import StatusBar from '../StatusBar/index.js';
+import { FIELDS } from './RuleDetail.consts.js';
+import type { Field, RuleDetailProps } from './RuleDetail.types.js';
 
 function getEntries(rule: Rule, field: Field): string[] {
 	if (field === 'command') return [rule.command];
@@ -57,11 +29,14 @@ function setEntries(rule: Rule, field: Field, entries: string[]): Rule {
 	return { ...rule, match: newMatch };
 }
 
-export default function RuleDetail({ rule, onSave, onBack }: Props) {
+export default function RuleDetail({ rule, onSave, onBack }: RuleDetailProps) {
 	const [selectedField, setSelectedField] = useState(0);
 	const [selectedEntry, setSelectedEntry] = useState(0);
 	const [editing, setEditing] = useState(false);
 	const [editValue, setEditValue] = useState('');
+	const [deleteConfirmIndex, setDeleteConfirmIndex] = useState<number | null>(
+		null,
+	);
 
 	const currentField = FIELDS[selectedField].key;
 	const entries = getEntries(rule, currentField);
@@ -80,6 +55,16 @@ export default function RuleDetail({ rule, onSave, onBack }: Props) {
 			} else if (input && !key.ctrl && !key.meta) {
 				setEditValue((prev) => prev + input);
 			}
+			return;
+		}
+
+		if (deleteConfirmIndex !== null) {
+			if (input === 'y' || input === 'Y') {
+				const updated = entries.filter((_, i) => i !== deleteConfirmIndex);
+				onSave(setEntries(rule, currentField, updated));
+				setSelectedEntry(Math.max(0, deleteConfirmIndex - 1));
+			}
+			setDeleteConfirmIndex(null);
 			return;
 		}
 
@@ -120,10 +105,12 @@ export default function RuleDetail({ rule, onSave, onBack }: Props) {
 			setSelectedEntry(updated.length - 1);
 			setEditing(true);
 			setEditValue('');
-		} else if (input === 'd' && currentField !== 'command' && entries.length > 0) {
-			const updated = entries.filter((_, i) => i !== selectedEntry);
-			onSave(setEntries(rule, currentField, updated));
-			setSelectedEntry(Math.max(0, selectedEntry - 1));
+		} else if (
+			input === 'd' &&
+			currentField !== 'command' &&
+			entries.length > 0
+		) {
+			setDeleteConfirmIndex(selectedEntry);
 		} else if (key.escape || input === 'q') {
 			onBack();
 		}
@@ -190,25 +177,27 @@ export default function RuleDetail({ rule, onSave, onBack }: Props) {
 				);
 			})}
 
-			<Box marginTop={1} borderStyle="round" borderColor={COLOR.GRAY} paddingX={1}>
-				<Text wrap="end">
-					<Text bold color={COLOR.MAGENTA}>
-						YAOSGit
-						<Text dimColor> : </Text>
-						ctx
+			{deleteConfirmIndex !== null ? (
+				<Box marginTop={0} marginBottom={1}>
+					<Text color={COLOR.RED}>Delete condition entry </Text>
+					<Text color={COLOR.RED} bold>
+						#{deleteConfirmIndex + 1}
 					</Text>
-					<Text dimColor> │ </Text>
-					<Text bold>↑↓</Text> navigate
-					<Text dimColor> │ </Text>
-					<Text bold>Enter</Text> edit
-					<Text dimColor> │ </Text>
-					<Text bold>a</Text> add
-					<Text dimColor> │ </Text>
-					<Text bold>d</Text> delete
-					<Text dimColor> │ </Text>
-					<Text bold>Esc</Text> back
-				</Text>
-			</Box>
+					<Text color={COLOR.RED}>? (y/N)</Text>
+				</Box>
+			) : null}
+
+			<StatusBar>
+				<Text bold>↑↓</Text> navigate
+				<Text dimColor> │ </Text>
+				<Text bold>Enter</Text> edit
+				<Text dimColor> │ </Text>
+				<Text bold>a</Text> add
+				<Text dimColor> │ </Text>
+				<Text bold>d</Text> delete
+				<Text dimColor> │ </Text>
+				<Text bold>Esc</Text> back
+			</StatusBar>
 		</Box>
 	);
 }

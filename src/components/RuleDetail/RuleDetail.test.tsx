@@ -1,5 +1,5 @@
 import { render } from 'ink-testing-library';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Rule } from '../../types/Rule/index.js';
 import RuleDetail from './index.js';
 
@@ -35,6 +35,113 @@ describe('RuleDetail', () => {
 			<RuleDetail rule={arrayRule} onSave={vi.fn()} onBack={vi.fn()} />,
 		);
 		expect(lastFrame()).toContain('1. package.json');
+		expect(lastFrame()).toContain('1. package.json');
 		expect(lastFrame()).toContain('2. pnpm-lock.yaml');
+	});
+
+	describe('keyboard interactions', () => {
+		let onSave: any;
+		let onBack: any;
+
+		beforeEach(() => {
+			onSave = vi.fn();
+			onBack = vi.fn();
+		});
+
+		it('navigates with arrows and edits field on enter', async () => {
+			const delay = () => new Promise((r) => setTimeout(r, 50));
+			const { stdin } = render(
+				<RuleDetail rule={rule} onSave={onSave} onBack={onBack} />,
+			);
+			await delay();
+
+			// Move down to 'file' field
+			stdin.write('\u001B[B');
+			await delay();
+
+			// Enter to edit
+			stdin.write('\r');
+			await delay();
+
+			// Append '2'
+			stdin.write('2');
+			await delay();
+
+			// Enter to save
+			stdin.write('\r');
+			await delay();
+
+			expect(onSave).toHaveBeenCalledWith({
+				match: { file: 'package.json2', env: 'NODE_ENV' },
+				command: 'npm run dev',
+			});
+		});
+
+		it('adds new condition entry on a', async () => {
+			const delay = () => new Promise((r) => setTimeout(r, 50));
+			const { stdin } = render(
+				<RuleDetail rule={rule} onSave={onSave} onBack={onBack} />,
+			);
+			await delay();
+
+			// Move down to 'file' field
+			stdin.write('\u001B[B');
+			await delay();
+
+			// a to add new entry
+			stdin.write('a');
+			await delay();
+
+			// We are now in edit mode for the new entry, type 'yarn.lock'
+			stdin.write('yarn.lock');
+			await delay();
+
+			// Enter to save
+			stdin.write('\r');
+			await delay();
+
+			expect(onSave).toHaveBeenCalledWith({
+				match: { file: ['package.json', 'yarn.lock'], env: 'NODE_ENV' },
+				command: 'npm run dev',
+			});
+		});
+
+		it('deletes condition entry on d', async () => {
+			const delay = () => new Promise((r) => setTimeout(r, 50));
+			const { stdin } = render(
+				<RuleDetail rule={rule} onSave={onSave} onBack={onBack} />,
+			);
+			await delay();
+
+			// Move down to 'file' field
+			stdin.write('\u001B[B');
+			await delay();
+
+			// d to delete 'package.json'
+			stdin.write('d');
+			await delay();
+
+			// Confirm with y
+			stdin.write('y');
+			await delay();
+
+			expect(onSave).toHaveBeenCalledWith({
+				match: { env: 'NODE_ENV' },
+				command: 'npm run dev',
+			});
+		});
+
+		it('goes back on escape or q', async () => {
+			const delay = () => new Promise((r) => setTimeout(r, 50));
+			const { stdin } = render(
+				<RuleDetail rule={rule} onSave={onSave} onBack={onBack} />,
+			);
+			await delay();
+
+			stdin.write('q');
+			await delay();
+
+			expect(onBack).toHaveBeenCalled();
+		});
 	});
 });

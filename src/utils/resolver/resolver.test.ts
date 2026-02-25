@@ -4,7 +4,7 @@ import { resolveAlias } from './index.js';
 
 const makeAlias = (desc: string): Alias => ({
 	description: desc,
-	rules: [{ match: {}, command: `echo ${desc}` }],
+	rules: [{ match: { file: 'package.json' }, command: `echo ${desc}` }],
 });
 
 describe('resolveAlias', () => {
@@ -15,6 +15,39 @@ describe('resolveAlias', () => {
 			alias: aliases.foo,
 			aliasName: 'foo',
 			passthroughArgs: [],
+		});
+	});
+
+	it('ignores arbitrary flags if root matches', () => {
+		const aliases = { foo: makeAlias('foo') };
+		const result = resolveAlias(aliases, ['foo', '--test', '-x']);
+		expect(result).toEqual({
+			alias: aliases.foo,
+			aliasName: 'foo',
+			passthroughArgs: ['--test', '-x'],
+		});
+	});
+
+	it('stops greedy dot-matching at -- (F4 constraint)', () => {
+		const aliases = {
+			foo: makeAlias('foo'),
+			'foo.bar': makeAlias('foo.bar'),
+		};
+		const result = resolveAlias(aliases, ['foo', '--', 'bar']);
+		expect(result).toEqual({
+			alias: aliases.foo,
+			aliasName: 'foo',
+			passthroughArgs: ['bar'],
+		});
+	});
+
+	it('ignores -- entirely when parsing passthrough payload', () => {
+		const aliases = { foo: makeAlias('foo') };
+		const result = resolveAlias(aliases, ['foo', '--', '--test']);
+		expect(result).toEqual({
+			alias: aliases.foo,
+			aliasName: 'foo',
+			passthroughArgs: ['--test'],
 		});
 	});
 
@@ -82,5 +115,10 @@ describe('resolveAlias', () => {
 			aliasName: 'foo.bar',
 			passthroughArgs: ['x', 'y'],
 		});
+	});
+	it('ignores alias names starting with a dash (flag-like)', () => {
+		const aliases = { '--help': makeAlias('help') };
+		const result = resolveAlias(aliases, ['--help']);
+		expect(result).toBeNull();
 	});
 });

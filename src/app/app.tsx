@@ -1,40 +1,42 @@
-import { useState } from 'react';
+import { useEffect } from 'react';
 import AliasList from '../components/AliasList/index.js';
 import RuleDetail from '../components/RuleDetail/index.js';
 import RuleEditor from '../components/RuleEditor/index.js';
-import type { Config } from '../types/Config/index.js';
-import { loadConfig, saveConfig } from '../utils/config/index.js';
+import { useConfig } from '../providers/ConfigProvider/index.js';
+import { useNavigation } from '../providers/NavigationProvider/index.js';
 
-type Screen =
-	| { type: 'alias-list' }
-	| { type: 'rule-editor'; aliasName: string }
-	| { type: 'rule-detail'; aliasName: string; ruleIndex: number };
+export function AppContent() {
+	const { config, updateConfig } = useConfig();
+	const { screen, navigateTo, goBack } = useNavigation();
 
-export default function App() {
-	const [config, setConfig] = useState<Config>(() => loadConfig());
-	const [screen, setScreen] = useState<Screen>({ type: 'alias-list' });
-
-	const handleSave = (newConfig: Config) => {
-		setConfig(newConfig);
-		saveConfig(newConfig);
-	};
+	// Check if current screen is valid, if not fall back to list
+	useEffect(() => {
+		if (screen.type === 'rule-editor') {
+			const alias = config.aliases[screen.aliasName];
+			if (!alias) navigateTo({ type: 'alias-list' });
+		} else if (screen.type === 'rule-detail') {
+			const detailAlias = config.aliases[screen.aliasName];
+			const rule = detailAlias?.rules[screen.ruleIndex];
+			if (!detailAlias || !rule) navigateTo({ type: 'alias-list' });
+		}
+	}, [screen, config.aliases, navigateTo]);
 
 	switch (screen.type) {
 		case 'alias-list':
 			return (
 				<AliasList
 					config={config}
-					onSave={handleSave}
+					onSave={updateConfig}
 					onEditAlias={(name) =>
-						setScreen({ type: 'rule-editor', aliasName: name })
+						navigateTo({ type: 'rule-editor', aliasName: name })
 					}
 				/>
 			);
 
 		case 'rule-editor': {
 			const alias = config.aliases[screen.aliasName];
+
 			if (!alias) {
-				setScreen({ type: 'alias-list' });
 				return null;
 			}
 			return (
@@ -42,7 +44,7 @@ export default function App() {
 					aliasName={screen.aliasName}
 					alias={alias}
 					onSave={(updatedAlias) => {
-						handleSave({
+						updateConfig({
 							...config,
 							aliases: {
 								...config.aliases,
@@ -50,22 +52,30 @@ export default function App() {
 							},
 						});
 					}}
-					onBack={() => setScreen({ type: 'alias-list' })}
+					onBack={goBack}
 					onEditRule={(index) =>
-						setScreen({
+						navigateTo({
 							type: 'rule-detail',
 							aliasName: screen.aliasName,
 							ruleIndex: index,
 						})
 					}
 					onRename={(oldName, newName) => {
-						const { [oldName]: renamedAlias, ...rest } = config.aliases;
+						const renamedAlias = config.aliases[oldName];
 						if (renamedAlias) {
-							handleSave({
+							const newAliases: typeof config.aliases = {};
+							for (const key of Object.keys(config.aliases)) {
+								if (key === oldName) {
+									newAliases[newName] = renamedAlias;
+								} else {
+									newAliases[key] = config.aliases[key]!;
+								}
+							}
+							updateConfig({
 								...config,
-								aliases: { ...rest, [newName]: renamedAlias },
+								aliases: newAliases,
 							});
-							setScreen({ type: 'rule-editor', aliasName: newName });
+							navigateTo({ type: 'rule-editor', aliasName: newName });
 						}
 					}}
 				/>
@@ -75,8 +85,8 @@ export default function App() {
 		case 'rule-detail': {
 			const detailAlias = config.aliases[screen.aliasName];
 			const rule = detailAlias?.rules[screen.ruleIndex];
+
 			if (!detailAlias || !rule) {
-				setScreen({ type: 'alias-list' });
 				return null;
 			}
 			return (
@@ -85,7 +95,7 @@ export default function App() {
 					onSave={(updatedRule) => {
 						const newRules = [...detailAlias.rules];
 						newRules[screen.ruleIndex] = updatedRule;
-						handleSave({
+						updateConfig({
 							...config,
 							aliases: {
 								...config.aliases,
@@ -96,12 +106,7 @@ export default function App() {
 							},
 						});
 					}}
-					onBack={() =>
-						setScreen({
-							type: 'rule-editor',
-							aliasName: screen.aliasName,
-						})
-					}
+					onBack={goBack}
 				/>
 			);
 		}

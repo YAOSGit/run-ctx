@@ -16,7 +16,7 @@ const sharedConfig = {
 	format: 'esm',
 	minify: true,
 	tsconfig: 'tsconfig.app.json',
-	external: builtinModules.map((m) => `node:${m}`),
+	external: ['re2', ...builtinModules.map((m) => `node:${m}`)],
 	banner: {
 		js: requireShim,
 	},

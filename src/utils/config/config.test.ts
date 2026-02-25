@@ -27,12 +27,13 @@ describe('config', () => {
 	describe('loadConfig', () => {
 		it('returns empty config when file does not exist', () => {
 			const config = loadConfig(path.join(tmpDir, 'nonexistent.json'));
-			expect(config).toEqual({ aliases: {} });
+			expect(config).toEqual({ version: 2, aliases: {} });
 		});
 
 		it('loads valid config from file', () => {
 			const filePath = path.join(tmpDir, 'config.json');
 			const expected: Config = {
+				version: 2,
 				aliases: {
 					dev: {
 						description: 'Start dev server',
@@ -47,11 +48,27 @@ describe('config', () => {
 			expect(config).toEqual(expected);
 		});
 
-		it('returns empty config for invalid JSON', () => {
+		it('returns empty config for invalid JSON structure and handles backups', () => {
 			const filePath = path.join(tmpDir, 'config.json');
-			fs.writeFileSync(filePath, 'not json');
-			const config = loadConfig(filePath);
-			expect(config).toEqual({ aliases: {} });
+			const testCases = [
+				'not json', // raw invalid string
+				'{ "aliases": { "dev": null } }', // dev is null instead of object
+				'{ "aliases": { "dev": { "rules": "not-an-array" } } }', // rules is a string instead of array
+				'{ "aliases": { "dev": { "rules": [{ "match": "bad" }] } } }', // match is a string instead of object
+			];
+			const consoleSpy = vi
+				.spyOn(console, 'error')
+				.mockImplementation(() => {});
+
+			for (const content of testCases) {
+				fs.writeFileSync(filePath, content);
+				const config = loadConfig(filePath);
+				expect(config).toEqual({ version: 2, aliases: {} });
+				// Verify backup is created at least once
+				expect(fs.existsSync(`${filePath}.bak`)).toBe(true);
+			}
+
+			consoleSpy.mockRestore();
 		});
 	});
 
@@ -72,7 +89,7 @@ describe('config', () => {
 
 		it('creates parent directories if they do not exist', () => {
 			const filePath = path.join(tmpDir, 'nested', 'deep', 'config.json');
-			saveConfig({ aliases: {} }, filePath);
+			saveConfig({ version: 1, aliases: {} }, filePath);
 			expect(fs.existsSync(filePath)).toBe(true);
 		});
 	});

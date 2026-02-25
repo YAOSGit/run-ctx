@@ -1,44 +1,86 @@
 import { Box, Text, useApp, useInput } from 'ink';
 import { useState } from 'react';
-import type { Config } from '../../types/Config/index.js';
 import { COLOR } from '../../types/Color/index.js';
+import StatusBar from '../StatusBar/index.js';
+import type { AliasListProps } from './AliasList.types.js';
 
-type Props = {
-	config: Config;
-	onSave: (config: Config) => void;
-	onEditAlias: (name: string) => void;
-};
-
-export default function AliasList({ config, onSave, onEditAlias }: Props) {
+export default function AliasList({
+	config,
+	onSave,
+	onEditAlias,
+}: AliasListProps) {
 	const { exit } = useApp();
-	const aliasNames = Object.keys(config.aliases);
+
 	const [selectedIndex, setSelectedIndex] = useState(0);
 	const [isCreating, setIsCreating] = useState(false);
 	const [newName, setNewName] = useState('');
+	const [error, setError] = useState<string | null>(null);
+
+	const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+	const [isSearching, setIsSearching] = useState(false);
+	const [searchQuery, setSearchQuery] = useState('');
+
+	const aliasNames = Object.keys(config.aliases).filter((name) =>
+		name.toLowerCase().includes(searchQuery.toLowerCase()),
+	);
 
 	useInput((input, key) => {
 		if (isCreating) {
 			if (key.return) {
-				if (newName.trim()) {
+				const trimmed = newName.trim();
+				if (trimmed) {
+					if (trimmed.startsWith('-')) {
+						setError('Alias names cannot start with a dash (-)');
+						return;
+					}
 					const newConfig = {
 						...config,
 						aliases: {
 							...config.aliases,
-							[newName.trim()]: { rules: [] },
+							[trimmed]: { rules: [] },
 						},
 					};
 					onSave(newConfig);
 				}
 				setIsCreating(false);
 				setNewName('');
+				setError(null);
 			} else if (key.escape) {
 				setIsCreating(false);
 				setNewName('');
+				setError(null);
 			} else if (key.backspace || key.delete) {
 				setNewName((prev) => prev.slice(0, -1));
+				setError(null);
 			} else if (input && !key.ctrl && !key.meta) {
 				setNewName((prev) => prev + input);
+				setError(null);
 			}
+			return;
+		}
+
+		if (isSearching) {
+			if (key.return || key.escape) {
+				setIsSearching(false);
+			} else if (key.backspace || key.delete) {
+				setSearchQuery((prev) => prev.slice(0, -1));
+				setSelectedIndex(0);
+			} else if (input && !key.ctrl && !key.meta) {
+				setSearchQuery((prev) => prev + input);
+				setSelectedIndex(0);
+			}
+			return;
+		}
+
+		if (deleteConfirm !== null) {
+			if (input === 'y' || input === 'Y') {
+				const { [deleteConfirm]: _, ...rest } = config.aliases;
+				onSave({ ...config, aliases: rest });
+				setSelectedIndex((prev) =>
+					Math.max(0, Math.min(prev, aliasNames.length - 2)),
+				);
+			}
+			setDeleteConfirm(null);
 			return;
 		}
 
@@ -51,10 +93,9 @@ export default function AliasList({ config, onSave, onEditAlias }: Props) {
 		} else if (input === 'n') {
 			setIsCreating(true);
 		} else if (input === 'd' && aliasNames.length > 0) {
-			const nameToDelete = aliasNames[selectedIndex];
-			const { [nameToDelete]: _, ...rest } = config.aliases;
-			onSave({ ...config, aliases: rest });
-			setSelectedIndex((prev) => Math.min(prev, aliasNames.length - 2));
+			setDeleteConfirm(aliasNames[selectedIndex]);
+		} else if (input === '/') {
+			setIsSearching(true);
 		} else if (input === 'q' || key.escape) {
 			exit();
 		}
@@ -69,9 +110,19 @@ export default function AliasList({ config, onSave, onEditAlias }: Props) {
 				<Text dimColor> — Manage your command aliases</Text>
 			</Box>
 
+			{isSearching ? (
+				<Box marginBottom={1}>
+					<Text color={COLOR.YELLOW}>Search: </Text>
+					<Text>{searchQuery}</Text>
+					<Text dimColor>|</Text>
+				</Box>
+			) : null}
+
 			{aliasNames.length === 0 ? (
 				<Text dimColor>
-					No aliases configured. Press 'n' to create one.
+					{searchQuery
+						? `No aliases match "${searchQuery}".`
+						: "No aliases configured. Press 'n' to create one."}
 				</Text>
 			) : (
 				aliasNames.map((name, index) => {
@@ -98,32 +149,37 @@ export default function AliasList({ config, onSave, onEditAlias }: Props) {
 			)}
 
 			{isCreating ? (
-				<Box marginTop={1}>
-					<Text color={COLOR.GREEN}>New alias name: </Text>
-					<Text>{newName}</Text>
-					<Text dimColor>|</Text>
+				<Box marginTop={1} flexDirection="column">
+					<Box>
+						<Text color={COLOR.GREEN}>New alias name: </Text>
+						<Text>{newName}</Text>
+						<Text dimColor>|</Text>
+					</Box>
+					{error ? <Text color={COLOR.RED}>{error}</Text> : null}
 				</Box>
 			) : null}
 
-			<Box marginTop={1} borderStyle="round" borderColor={COLOR.GRAY} paddingX={1}>
-				<Text wrap="end">
-					<Text bold color={COLOR.MAGENTA}>
-						YAOSGit
-						<Text dimColor> : </Text>
-						ctx
+			{deleteConfirm ? (
+				<Box marginTop={1}>
+					<Text color={COLOR.RED}>Delete alias </Text>
+					<Text color={COLOR.RED} bold>
+						{deleteConfirm}
 					</Text>
-					<Text dimColor> │ </Text>
-					<Text bold>↑↓</Text> navigate
-					<Text dimColor> │ </Text>
-					<Text bold>Enter</Text> edit
-					<Text dimColor> │ </Text>
-					<Text bold>n</Text> new
-					<Text dimColor> │ </Text>
-					<Text bold>d</Text> delete
-					<Text dimColor> │ </Text>
-					<Text bold>q</Text> quit
-				</Text>
-			</Box>
+					<Text color={COLOR.RED}>? (y/N)</Text>
+				</Box>
+			) : null}
+
+			<StatusBar>
+				<Text bold>↑↓</Text> navigate
+				<Text dimColor> │ </Text>
+				<Text bold>Enter</Text> edit
+				<Text dimColor> │ </Text>
+				<Text bold>n</Text> new
+				<Text dimColor> │ </Text>
+				<Text bold>d</Text> delete
+				<Text dimColor> │ </Text>
+				<Text bold>q</Text> quit
+			</StatusBar>
 		</Box>
 	);
 }

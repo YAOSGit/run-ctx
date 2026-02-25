@@ -129,6 +129,9 @@ describe('RuleEditor', () => {
 		// Name is selected by default (index 0), press Enter to edit
 		stdin.write('\r');
 		await delay();
+		// Clear existing name ("dev" = 3 chars)
+		for (let i = 0; i < 3; i++) stdin.write('\u007F');
+		await delay();
 		// Type new name
 		stdin.write('start');
 		await delay();

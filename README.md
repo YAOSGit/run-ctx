@@ -105,29 +105,13 @@ npm link
 
 ## Quick Start
 
-1. Create the config directory and file:
+1. Generate a starter configuration file automatically:
 
 ```bash
-mkdir -p ~/.config/run-ctx
+run-ctx --init
 ```
 
-1. Add your first alias to `~/.config/run-ctx/config.json`:
-
-```json
-{
-  "aliases": {
-    "dev": {
-      "description": "Start dev server",
-      "rules": [
-        {
-          "match": { "file": "package.json" },
-          "command": "npm run dev"
-        }
-      ]
-    }
-  }
-}
-```
+> **Note:** This automatically creates `~/.config/run-ctx/config.json` populated with common smart aliases like `dev`, `build`, `test`, `lint`, and `start` configured for popular languages and frameworks.
 
 1. Run it:
 
@@ -147,6 +131,7 @@ The config file lives at `~/.config/run-ctx/config.json` (or `$XDG_CONFIG_HOME/r
 
 ```json
 {
+  "version": 2,
   "aliases": {
     "<alias-name>": {
       "description": "Optional human-readable description",
@@ -157,10 +142,12 @@ The config file lives at `~/.config/run-ctx/config.json` (or `$XDG_CONFIG_HOME/r
             "cwd": "<regex pattern>",
             "env": "<VAR_NAME>"
           },
-          "command": "<shell command to run>"
+          "command": "<shell command to run>",
+          "shell": false
         }
       ],
-      "fallback": "<optional command when no rules match>"
+      "fallback": "<optional command when no rules match>",
+      "shell": false
     }
   }
 }
@@ -221,6 +208,9 @@ run-ctx <alias> [args...]       Run alias, pass through additional args
 run-ctx --list, -l              Show all aliases and matched commands for current context
 run-ctx --dry-run <alias>       Show what command would run without executing
 run-ctx --edit, -e              Launch the TUI editor (run-ctx-editor)
+run-ctx --completions <shell>   Generate shell completion script (bash, zsh, fish)
+run-ctx --shell                 Run command in shell (allows pipe, redirect, &&)
+run-ctx --verbose, -V           Show detailed rule evaluation logs
 run-ctx --help, -h              Show help message
 run-ctx --version, -v           Show version information
 ```
@@ -239,6 +229,9 @@ run-ctx --dry-run build
 
 # Open the interactive config editor
 run-ctx --edit
+
+# Configure bash tab-completion for rc/run-ctx
+eval "$(rc --completions bash)"
 ```
 
 ---
@@ -380,7 +373,9 @@ A realistic config for a polyglot developer:
 - **[React 19](https://react.dev/)** - UI component library
 - **[Ink 6](https://github.com/vadimdemedes/ink)** - React for CLIs
 - **[TypeScript 5](https://www.typescriptlang.org/)** - Type-safe JavaScript
-- **[Commander](https://github.com/tj/commander.js)** - CLI argument parsing
+- **[picomatch](https://github.com/micromatch/picomatch)** - Blazing fast glob matching
+- **[re2](https://github.com/uhop/node-re2)** - Linear-time regex engine (ReDoS protected)
+- **[omelette](https://github.com/fcan/omelette)** - Shell tab-completion engine
 
 ### Build & Development
 
