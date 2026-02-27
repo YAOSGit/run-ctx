@@ -1,26 +1,7 @@
 {
 	"name": "@yaos-git/run-ctx",
-	"version": "126.0.1",
+	"version": "126.0.2",
 	"description": "Context-aware command alias CLI — run the right command based on cwd, files, and env vars",
-	"keywords": [
-		"cli",
-		"alias",
-		"context",
-		"command-runner",
-		"tui",
-		"devtools"
-	],
-	"homepage": "https://github.com/YAOSGit/run-ctx#readme",
-	"bugs": {
-		"url": "https://github.com/YAOSGit/run-ctx/issues"
-	},
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/YAOSGit/run-ctx.git"
-	},
-	"license": "ISC",
-	"author": "Ygor de Paula",
-	"type": "module",
 	"main": "dist/cli.js",
 	"bin": {
 		"run-ctx": "dist/cli.js",
@@ -52,8 +33,29 @@
 		"coverage": "vitest run --coverage",
 		"coverage:unit": "vitest run -c vitest.unit.config.ts --coverage",
 		"coverage:react": "vitest run -c vitest.react.config.ts --coverage",
-		"prepublishOnly": "npm run lint:types && npm run lint:check && npm run test:unit && npm run test:react && npm run test:types && npm run lint:audit && npm run build"
+		"prepublishOnly": "npm run lint:types && npm run lint:check && npm run test:unit && npm run test:react && npm run test:types && npm run test:e2e && npm run lint:audit && npm run build"
 	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/YAOSGit/run-ctx.git"
+	},
+	"bugs": {
+		"url": "https://github.com/YAOSGit/run-ctx/issues"
+	},
+	"homepage": "https://github.com/YAOSGit/run-ctx#readme",
+	"keywords": [
+		"cli",
+		"alias",
+		"context",
+		"command-runner",
+		"tui",
+		"devtools"
+	],
+	"author": "Ygor de Paula",
+	"email": "ygorh.de.paula@gmail.com",
+	"url": "https://github.com/YAOSGit/run-ctx",
+	"license": "ISC",
+	"type": "module",
 	"dependencies": {
 		"chalk": "^5.6.2",
 		"commander": "^14.0.3",
@@ -84,7 +86,5 @@
 		"strip-ansi": "^7.1.2",
 		"typescript": "^5.9.3",
 		"vitest": "^4.0.15"
-	},
-	"email": "ygorh.de.paula@gmail.com",
-	"url": "https://github.com/YAOSGit/run-tui"
+	}
 }

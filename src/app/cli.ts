@@ -6,10 +6,7 @@ import { fileURLToPath } from 'node:url';
 import chalk from 'chalk';
 import { Command } from 'commander';
 import omelette from 'omelette';
-import {
-	bootstrapStarterConfig,
-	loadConfig,
-} from '../utils/config/index.js';
+import { bootstrapStarterConfig, loadConfig } from '../utils/config/index.js';
 import { execute } from '../utils/executor/index.js';
 import { findBestMatch } from '../utils/matcher/index.js';
 import { resolveAlias } from '../utils/resolver/index.js';
@@ -110,10 +107,16 @@ export function runCLI(args: string[] = process.argv.slice(2)): void {
 			'Context-aware command alias CLI — run the right command based on cwd, files, and env vars',
 		)
 		.helpOption(false)
-		.argument('[args...]', 'Alias name (dot-notation) followed by extra arguments')
+		.argument(
+			'[args...]',
+			'Alias name (dot-notation) followed by extra arguments',
+		)
 		.option('-h, --help', 'Show this help message')
 		.option('-v, --version', 'Show version information')
-		.option('-l, --list', 'List all aliases and matched commands for current context')
+		.option(
+			'-l, --list',
+			'List all aliases and matched commands for current context',
+		)
 		.option('--init', 'Bootstrap a new rich starter configuration')
 		.option('--dry-run', 'Show what command would run without executing')
 		.option('-e, --edit', 'Launch the TUI editor (run-ctx-editor)')
@@ -121,10 +124,7 @@ export function runCLI(args: string[] = process.argv.slice(2)): void {
 			'--completions <shell>',
 			'Generate shell completion script (bash, zsh, fish)',
 		)
-		.option(
-			'--shell',
-			'Run command in shell (allows pipe, redirect, &&)',
-		)
+		.option('--shell', 'Run command in shell (allows pipe, redirect, &&)')
 		.option('-V, --verbose', 'Show detailed rule evaluation logs')
 		.allowExcessArguments(true)
 		.action(

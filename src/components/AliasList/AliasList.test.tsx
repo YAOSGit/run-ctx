@@ -1,4 +1,3 @@
-import * as ink from 'ink';
 import { render } from 'ink-testing-library';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Config } from '../../types/Config/index.js';

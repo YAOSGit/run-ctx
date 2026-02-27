@@ -110,7 +110,7 @@ describe('executor', () => {
 			} as any);
 
 			const code = execute('sleep 100', []);
-			expect(code).toBe(128 + os.constants.signals['SIGTERM']);
+			expect(code).toBe(128 + os.constants.signals.SIGTERM);
 		});
 
 		it('returns fallback exit code of 1 when status is null without error or signal', () => {

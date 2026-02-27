@@ -91,7 +91,7 @@ export function loadConfig(filePath?: string): Config {
 		}
 
 		return validConfig;
-	} catch (err) {
+	} catch (_err) {
 		console.error(`Warning: ${configPath} is malformed, using defaults`);
 		const backupPath = `${configPath}.bak`;
 		try {

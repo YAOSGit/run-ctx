@@ -20,7 +20,7 @@ vi.mock('../utils/resolver/index.js', async (importOriginal) => {
 	return {
 		...mod,
 		resolveAlias: vi.fn((_aliases: any, args: string[]) => {
-			if (args[0] && args[0].startsWith('--')) return null;
+			if (args[0]?.startsWith('--')) return null;
 			return null;
 		}),
 	};
@@ -47,8 +47,8 @@ describe('CLI execution', () => {
 		exitSpy = vi
 			.spyOn(process, 'exit')
 			.mockImplementation(() => undefined as never);
-		consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => { });
-		consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
+		consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+		consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
 		vi.mocked(configModule.loadConfig).mockReturnValue({
 			version: 1,
@@ -65,7 +65,6 @@ describe('CLI execution', () => {
 		vi.restoreAllMocks();
 	});
 
-
 	it('T6: --dry-run delegates to resolveAlias to ensure consistency with normal execution', () => {
 		const rule = { command: 'echo nested', match: {} };
 		const fakeMatch = {
@@ -73,8 +72,7 @@ describe('CLI execution', () => {
 			aliasName: 'foo.bar',
 			passthroughArgs: [],
 		};
-		vi.mocked(resolveModule.resolveAlias)
-			.mockReturnValueOnce(fakeMatch as any);
+		vi.mocked(resolveModule.resolveAlias).mockReturnValueOnce(fakeMatch as any);
 		vi.mocked(matcherModule.findBestMatch).mockReturnValueOnce({
 			command: 'echo nested',
 			score: 1,
@@ -105,9 +103,11 @@ describe('CLI execution', () => {
 	});
 
 	it('T8: --init aborts and exits if config already exists', () => {
-		vi.mocked(configModule.bootstrapStarterConfig).mockImplementationOnce(() => {
-			throw new Error('A configuration file already exists');
-		});
+		vi.mocked(configModule.bootstrapStarterConfig).mockImplementationOnce(
+			() => {
+				throw new Error('A configuration file already exists');
+			},
+		);
 
 		runCLI(['--init']);
 
@@ -173,9 +173,7 @@ describe('CLI execution', () => {
 
 		runCLI(['--list']);
 
-		expect(consoleLogSpy).toHaveBeenCalledWith(
-			expect.stringContaining('foo'),
-		);
+		expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('foo'));
 		expect(exitSpy).toHaveBeenCalledWith(0);
 	});
 
@@ -184,9 +182,7 @@ describe('CLI execution', () => {
 
 		runCLI(['-l']);
 
-		expect(consoleLogSpy).toHaveBeenCalledWith(
-			expect.stringContaining('foo'),
-		);
+		expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('foo'));
 		expect(exitSpy).toHaveBeenCalledWith(0);
 	});
 
@@ -252,11 +248,9 @@ describe('CLI execution', () => {
 
 		runCLI(['--edit']);
 
-		expect(execFileSync).toHaveBeenCalledWith(
-			'run-ctx-editor',
-			[],
-			{ stdio: 'inherit' },
-		);
+		expect(execFileSync).toHaveBeenCalledWith('run-ctx-editor', [], {
+			stdio: 'inherit',
+		});
 		expect(exitSpy).toHaveBeenCalledWith(0);
 	});
 

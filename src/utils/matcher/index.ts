@@ -171,7 +171,7 @@ export function findBestMatch(
 
 	if (isVerbose) {
 		if (best) {
-			const bestIndex = rules.findIndex((r) => r === best!.rule);
+			const bestIndex = rules.indexOf(best?.rule);
 			console.error(
 				`  Winner: Rule ${bestIndex + 1} (score [${best.score.join(',')}])`,
 			);
