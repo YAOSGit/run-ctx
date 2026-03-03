@@ -32,7 +32,11 @@ describe('useConfig', () => {
 		const newConfig = { aliases: { test: { rules: [] } } };
 
 		act(() => {
-			result.current.updateConfig(newConfig as any);
+			result.current.updateConfig(
+				newConfig as unknown as Parameters<
+					typeof result.current.updateConfig
+				>[0],
+			);
 			vi.advanceTimersByTime(500);
 		});
 

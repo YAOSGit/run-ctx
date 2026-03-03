@@ -1,7 +1,7 @@
 import { render } from 'ink-testing-library';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, type Mock, vi } from 'vitest';
 import type { Rule } from '../../types/Rule/index.js';
-import RuleDetail from './index.js';
+import { RuleDetail } from './index.js';
 
 describe('RuleDetail', () => {
 	const rule: Rule = {
@@ -40,8 +40,8 @@ describe('RuleDetail', () => {
 	});
 
 	describe('keyboard interactions', () => {
-		let onSave: any;
-		let onBack: any;
+		let onSave: Mock;
+		let onBack: Mock;
 
 		beforeEach(() => {
 			onSave = vi.fn();

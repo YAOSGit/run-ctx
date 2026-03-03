@@ -1,7 +1,7 @@
 import { Box, Text, useInput } from 'ink';
 import { useState } from 'react';
 import { COLOR } from '../../types/Color/index.js';
-import StatusBar from '../StatusBar/index.js';
+import { StatusBar } from '../StatusBar/index.js';
 import type { RuleEditorProps } from './RuleEditor.types.js';
 
 function formatMatchValue(value: string | string[]): string {
@@ -18,7 +18,7 @@ function formatMatch(
 	return parts.join(', ');
 }
 
-export default function RuleEditor({
+export function RuleEditor({
 	aliasName,
 	alias,
 	onSave,

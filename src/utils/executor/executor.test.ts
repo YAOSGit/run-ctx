@@ -65,7 +65,7 @@ describe('executor', () => {
 				output: [],
 				stdout: '',
 				stderr: '',
-			} as any);
+			} as unknown as childProcess.SpawnSyncReturns<string>);
 
 			const code = execute('echo hello', []);
 			expect(code).toBe(0);
@@ -88,7 +88,7 @@ describe('executor', () => {
 				output: [],
 				stdout: '',
 				stderr: '',
-			} as any);
+			} as unknown as childProcess.SpawnSyncReturns<string>);
 
 			const code = execute('nonexistent-binary-xyz', []);
 			expect(code).toBe(1);
@@ -107,7 +107,7 @@ describe('executor', () => {
 				output: [],
 				stdout: '',
 				stderr: '',
-			} as any);
+			} as unknown as childProcess.SpawnSyncReturns<string>);
 
 			const code = execute('sleep 100', []);
 			expect(code).toBe(128 + os.constants.signals.SIGTERM);
@@ -122,7 +122,7 @@ describe('executor', () => {
 				output: [],
 				stdout: '',
 				stderr: '',
-			} as any);
+			} as unknown as childProcess.SpawnSyncReturns<string>);
 
 			const code = execute('unknown-state', []);
 			expect(code).toBe(1);

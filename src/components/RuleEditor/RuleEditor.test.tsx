@@ -1,7 +1,7 @@
 import { render } from 'ink-testing-library';
 import { describe, expect, it, vi } from 'vitest';
 import type { Alias } from '../../types/Alias/index.js';
-import RuleEditor from './index.js';
+import { RuleEditor } from './index.js';
 
 describe('RuleEditor', () => {
 	const alias: Alias = {

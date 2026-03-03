@@ -2,7 +2,7 @@ import { Box, Text, useInput } from 'ink';
 import { useState } from 'react';
 import { COLOR } from '../../types/Color/index.js';
 import type { MatchCondition, Rule } from '../../types/Rule/index.js';
-import StatusBar from '../StatusBar/index.js';
+import { StatusBar } from '../StatusBar/index.js';
 import { FIELDS } from './RuleDetail.consts.js';
 import type { Field, RuleDetailProps } from './RuleDetail.types.js';
 
@@ -29,7 +29,7 @@ function setEntries(rule: Rule, field: Field, entries: string[]): Rule {
 	return { ...rule, match: newMatch };
 }
 
-export default function RuleDetail({ rule, onSave, onBack }: RuleDetailProps) {
+export function RuleDetail({ rule, onSave, onBack }: RuleDetailProps) {
 	const [selectedField, setSelectedField] = useState(0);
 	const [selectedEntry, setSelectedEntry] = useState(0);
 	const [editing, setEditing] = useState(false);

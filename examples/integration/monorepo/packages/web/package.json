@@ -1,0 +1,10 @@
+{
+	"name": "@example/web",
+	"version": "1.0.0",
+	"private": true,
+	"scripts": {
+		"dev:web": "vite dev",
+		"test": "vitest",
+		"test:ci": "vitest run --coverage"
+	}
+}

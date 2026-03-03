@@ -6,7 +6,7 @@ type StatusBarProps = {
 	children: React.ReactNode;
 };
 
-export default function StatusBar({ children }: StatusBarProps) {
+export function StatusBar({ children }: StatusBarProps) {
 	return (
 		<Box
 			marginTop={1}

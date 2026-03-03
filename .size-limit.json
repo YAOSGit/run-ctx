@@ -1,0 +1,8 @@
+[
+	{
+		"path": "dist/cli.js"
+	},
+	{
+		"path": "dist/editor-cli.js"
+	}
+]

@@ -1,14 +1,10 @@
 import { Box, Text, useApp, useInput } from 'ink';
 import { useState } from 'react';
 import { COLOR } from '../../types/Color/index.js';
-import StatusBar from '../StatusBar/index.js';
+import { StatusBar } from '../StatusBar/index.js';
 import type { AliasListProps } from './AliasList.types.js';
 
-export default function AliasList({
-	config,
-	onSave,
-	onEditAlias,
-}: AliasListProps) {
+export function AliasList({ config, onSave, onEditAlias }: AliasListProps) {
 	const { exit } = useApp();
 
 	const [selectedIndex, setSelectedIndex] = useState(0);

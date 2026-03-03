@@ -1,0 +1,10 @@
+{
+	"name": "@example/api",
+	"version": "1.0.0",
+	"private": true,
+	"scripts": {
+		"dev:api": "tsx watch src/index.ts",
+		"test": "vitest",
+		"test:ci": "vitest run --coverage"
+	}
+}

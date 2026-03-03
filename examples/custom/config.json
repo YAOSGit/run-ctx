@@ -1,0 +1,83 @@
+{
+	"version": 1,
+	"aliases": {
+		"dev": {
+			"description": "Context-aware dev server",
+			"rules": [
+				{
+					"match": {
+						"file": ["package.json", "next.config.js"],
+						"env": "NODE_ENV"
+					},
+					"command": "next dev"
+				},
+				{
+					"match": { "file": ["package.json", "vite.config.ts"] },
+					"command": "vite dev"
+				},
+				{
+					"match": { "file": "package.json" },
+					"command": "npm run dev"
+				}
+			],
+			"fallback": "echo 'No dev environment detected'"
+		},
+		"deploy": {
+			"description": "Deploy based on environment",
+			"rules": [
+				{
+					"match": { "env": "CI", "file": "Dockerfile" },
+					"command": "docker build -t app . && docker push app"
+				},
+				{
+					"match": { "file": "Dockerfile" },
+					"command": "docker build -t app:local ."
+				},
+				{
+					"match": { "file": "serverless.yml" },
+					"command": "serverless deploy"
+				}
+			],
+			"fallback": "echo 'No deploy configuration found'"
+		},
+		"docker.up": {
+			"description": "Start Docker services",
+			"rules": [
+				{
+					"match": { "file": "docker-compose.yml" },
+					"command": "docker compose up -d"
+				},
+				{
+					"match": { "file": "compose.yaml" },
+					"command": "docker compose up -d"
+				}
+			]
+		},
+		"docker.down": {
+			"description": "Stop Docker services",
+			"rules": [
+				{
+					"match": { "file": "docker-compose.yml" },
+					"command": "docker compose down"
+				},
+				{
+					"match": { "file": "compose.yaml" },
+					"command": "docker compose down"
+				}
+			]
+		},
+		"docker.logs": {
+			"description": "View Docker logs",
+			"rules": [
+				{
+					"match": { "file": "docker-compose.yml" },
+					"command": "docker compose logs -f"
+				},
+				{
+					"match": { "file": "compose.yaml" },
+					"command": "docker compose logs -f"
+				}
+			]
+		}
+	}
+}

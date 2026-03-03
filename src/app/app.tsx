@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
-import AliasList from '../components/AliasList/index.js';
-import RuleDetail from '../components/RuleDetail/index.js';
-import RuleEditor from '../components/RuleEditor/index.js';
+import { AliasList } from '../components/AliasList/index.js';
+import { RuleDetail } from '../components/RuleDetail/index.js';
+import { RuleEditor } from '../components/RuleEditor/index.js';
 import { useConfig } from '../providers/ConfigProvider/index.js';
 import { useNavigation } from '../providers/NavigationProvider/index.js';
 
@@ -68,7 +68,8 @@ export function AppContent() {
 								if (key === oldName) {
 									newAliases[newName] = renamedAlias;
 								} else {
-									newAliases[key] = config.aliases[key]!;
+									const existing = config.aliases[key];
+									if (existing) newAliases[key] = existing;
 								}
 							}
 							updateConfig({

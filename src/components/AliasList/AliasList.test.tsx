@@ -1,7 +1,7 @@
 import { render } from 'ink-testing-library';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, type Mock, vi } from 'vitest';
 import type { Config } from '../../types/Config/index.js';
-import AliasList from './index.js';
+import { AliasList } from './index.js';
 
 describe('AliasList', () => {
 	const baseConfig: Config = {
@@ -39,8 +39,8 @@ describe('AliasList', () => {
 	});
 
 	describe('keyboard interactions', () => {
-		let onSave: any;
-		let onEditAlias: any;
+		let onSave: Mock;
+		let onEditAlias: Mock;
 
 		beforeEach(() => {
 			onSave = vi.fn();

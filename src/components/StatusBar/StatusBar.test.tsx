@@ -1,6 +1,6 @@
 import { render } from 'ink-testing-library';
 import { describe, expect, it } from 'vitest';
-import StatusBar from './index.js';
+import { StatusBar } from './index.js';
 
 describe('StatusBar', () => {
 	it('renders without crashing', () => {

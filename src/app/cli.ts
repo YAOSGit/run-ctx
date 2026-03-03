@@ -145,19 +145,22 @@ export function runCLI(args: string[] = process.argv.slice(2)): void {
 				// --help
 				if (options.help) {
 					printHelp(aliasNames);
-					process.exit(0);
+					process.exitCode = 0;
+					return;
 				}
 
 				// --version
 				if (options.version) {
 					console.log(printVersion());
-					process.exit(0);
+					process.exitCode = 0;
+					return;
 				}
 
 				// --list
 				if (options.list) {
 					printList(config);
-					process.exit(0);
+					process.exitCode = 0;
+					return;
 				}
 
 				// --completions <shell>
@@ -165,12 +168,15 @@ export function runCLI(args: string[] = process.argv.slice(2)): void {
 					const shell = options.completions;
 					if (!['bash', 'zsh', 'fish'].includes(shell)) {
 						console.error('Usage: run-ctx --completions <bash|zsh|fish>');
-						process.exit(1);
+						process.exitCode = 1;
+						return;
 					}
 					console.log(
+						// biome-ignore lint/suspicious/noExplicitAny: omelette types are incomplete
 						(completion as any).generateCompletionCode(shell, 'run-ctx'),
 					);
-					process.exit(0);
+					process.exitCode = 0;
+					return;
 				}
 
 				// --init
@@ -184,15 +190,18 @@ export function runCLI(args: string[] = process.argv.slice(2)): void {
 						console.log(
 							`Run ${chalk.yellow('run-ctx --list')} to explore your new aliases.`,
 						);
-						process.exit(0);
+						process.exitCode = 0;
+						return;
 					} catch (err) {
 						console.error(
 							chalk.red(
-								(err as Error).message || 'Failed to initialize config',
+								(err instanceof Error ? err.message : String(err)) ||
+									'Failed to initialize config',
 							),
 						);
 						console.error('If you want to start fresh, delete it first.');
-						process.exit(1);
+						process.exitCode = 1;
+						return;
 					}
 				}
 
@@ -209,22 +218,26 @@ export function runCLI(args: string[] = process.argv.slice(2)): void {
 							execFileSync('run-ctx-editor', [], { stdio: 'inherit' });
 						} catch {
 							console.error('Could not launch run-ctx-editor.');
-							process.exit(1);
+							process.exitCode = 1;
+							return;
 						}
 					}
-					process.exit(0);
+					process.exitCode = 0;
+					return;
 				}
 
 				// --dry-run <alias>
 				if (options.dryRun) {
 					if (args.length === 0) {
 						console.error('Usage: run-ctx --dry-run <alias>');
-						process.exit(1);
+						process.exitCode = 1;
+						return;
 					}
 					const resolvedDry = resolveAlias(config.aliases, args);
 					if (!resolvedDry) {
 						console.error(`Unknown alias: "${args[0]}"`);
-						process.exit(1);
+						process.exitCode = 1;
+						return;
 					}
 					const { alias: dryAlias, aliasName } = resolvedDry;
 					const match = findBestMatch(
@@ -244,15 +257,18 @@ export function runCLI(args: string[] = process.argv.slice(2)): void {
 						console.error(
 							`No matching rule for "${aliasName}" in this context.`,
 						);
-						process.exit(1);
+						process.exitCode = 1;
+						return;
 					}
-					process.exit(0);
+					process.exitCode = 0;
+					return;
 				}
 
 				// No positional args and no flag-based command → show help
 				if (args.length === 0) {
 					printHelp(aliasNames);
-					process.exit(0);
+					process.exitCode = 0;
+					return;
 				}
 
 				// Reconstruct the full args array for resolveAlias when '--' was used.
@@ -276,27 +292,30 @@ export function runCLI(args: string[] = process.argv.slice(2)): void {
 						const exitCode = execute(match.command, passthroughArgs, {
 							shell: options.shell || match.rule.shell || alias.shell,
 						});
-						process.exit(exitCode);
+						process.exitCode = exitCode;
+						return;
 					} else if (alias.fallback) {
 						const exitCode = execute(alias.fallback, passthroughArgs, {
 							shell: options.shell || alias.shell,
 						});
-						process.exit(exitCode);
+						process.exitCode = exitCode;
+						return;
 					} else {
 						console.error(
 							`No matching rule for alias "${resolved.aliasName}" in this context.`,
 						);
 						console.error(`  cwd: ${cwd}`);
 						console.error(`  rules checked: ${alias.rules.length}`);
-						process.exit(1);
+						process.exitCode = 1;
+						return;
 					}
-					return;
 				}
 
 				// Not a recognized alias or flag
 				console.error(`Unknown alias or option: "${args[0]}"`);
 				console.error('Run "run-ctx --help" for usage information.');
-				process.exit(1);
+				process.exitCode = 1;
+				return;
 			},
 		);
 

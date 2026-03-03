@@ -37,7 +37,8 @@ describe('CLI E2E Tests', () => {
 				cwd,
 			});
 			return { stdout, stderr, exitCode: 0 };
-		} catch (error: any) {
+		} catch (e: unknown) {
+			const error = e as { code?: number; stdout?: string; stderr?: string };
 			return {
 				stdout: error.stdout || '',
 				stderr: error.stderr || '',

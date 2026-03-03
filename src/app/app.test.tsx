@@ -1,7 +1,8 @@
 import { render } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, type Mock, vi } from 'vitest';
 import { useConfig } from '../providers/ConfigProvider/index.js';
 import { useNavigation } from '../providers/NavigationProvider/index.js';
+import type { Config } from '../types/Config/index.js';
 import { AppContent } from './app.js';
 
 vi.mock('../providers/ConfigProvider/index.js', () => ({
@@ -14,13 +15,13 @@ vi.mock('../providers/NavigationProvider/index.js', () => ({
 
 // We mock the child TUI components so we don't need Ink's renderer in a plain React test
 vi.mock('../components/AliasList/index.js', () => ({
-	default: () => <div data-testid="alias-list" />,
+	AliasList: () => <div data-testid="alias-list" />,
 }));
 vi.mock('../components/RuleDetail/index.js', () => ({
-	default: () => <div data-testid="rule-detail" />,
+	RuleDetail: () => <div data-testid="rule-detail" />,
 }));
 vi.mock('../components/RuleEditor/index.js', () => ({
-	default: () => <div data-testid="rule-editor" />,
+	RuleEditor: () => <div data-testid="rule-editor" />,
 }));
 
 describe('AppContent', () => {
@@ -29,9 +30,9 @@ describe('AppContent', () => {
 			dev: { rules: [] },
 		},
 	};
-	let mockNavigateTo: any;
-	let mockGoBack: any;
-	let mockUpdateConfig: any;
+	let mockNavigateTo: Mock;
+	let mockGoBack: Mock;
+	let mockUpdateConfig: Mock;
 
 	beforeEach(() => {
 		mockNavigateTo = vi.fn();
@@ -39,7 +40,7 @@ describe('AppContent', () => {
 		mockUpdateConfig = vi.fn();
 
 		vi.mocked(useConfig).mockReturnValue({
-			config: mockConfig as any,
+			config: mockConfig as unknown as Config,
 			updateConfig: mockUpdateConfig,
 		});
 
@@ -83,7 +84,7 @@ describe('AppContent', () => {
 			},
 		};
 		vi.mocked(useConfig).mockReturnValue({
-			config: configWithRule as any,
+			config: configWithRule as unknown as Config,
 			updateConfig: mockUpdateConfig,
 		});
 		vi.mocked(useNavigation).mockReturnValue({

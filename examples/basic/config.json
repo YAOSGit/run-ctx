@@ -1,0 +1,35 @@
+{
+	"version": 1,
+	"aliases": {
+		"dev": {
+			"description": "Start development server",
+			"rules": [
+				{ "match": { "file": "package.json" }, "command": "npm run dev" },
+				{ "match": { "file": "Cargo.toml" }, "command": "cargo watch -x run" },
+				{ "match": { "file": "go.mod" }, "command": "go run ." }
+			],
+			"fallback": "echo 'No dev script found for this project'"
+		},
+		"build": {
+			"description": "Build the project",
+			"rules": [
+				{ "match": { "file": "package.json" }, "command": "npm run build" },
+				{
+					"match": { "file": "Cargo.toml" },
+					"command": "cargo build --release"
+				},
+				{ "match": { "file": "go.mod" }, "command": "go build ./..." }
+			],
+			"fallback": "echo 'No build command found'"
+		},
+		"test": {
+			"description": "Run tests",
+			"rules": [
+				{ "match": { "file": "package.json" }, "command": "npm test" },
+				{ "match": { "file": "Cargo.toml" }, "command": "cargo test" },
+				{ "match": { "file": "go.mod" }, "command": "go test ./..." }
+			],
+			"fallback": "echo 'No test command found'"
+		}
+	}
+}
