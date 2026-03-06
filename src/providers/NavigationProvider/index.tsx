@@ -1,6 +1,6 @@
 import type React from 'react';
 import { createContext, useContext, useMemo } from 'react';
-import { useNavigation as useNavigationHook } from '../../hooks/useNavigation/index.js';
+import { useNavigationState } from '../../hooks/useNavigation/index.js';
 import type {
 	NavigationContextValue,
 	NavigationProviderProps,
@@ -11,7 +11,7 @@ const NavigationContext = createContext<NavigationContextValue | null>(null);
 export const NavigationProvider: React.FC<NavigationProviderProps> = ({
 	children,
 }) => {
-	const navState = useNavigationHook();
+	const navState = useNavigationState();
 
 	const value: NavigationContextValue = useMemo(
 		() => ({

@@ -1,6 +1,8 @@
 import { spawnSync } from 'node:child_process';
 import os from 'node:os';
 
+const SIGNAL_EXIT_OFFSET = 128;
+
 export type ParsedCommand = {
 	program: string;
 	args: string[];
@@ -78,7 +80,7 @@ export function execute(
 
 	if (result.signal) {
 		const sigNum = os.constants.signals[result.signal];
-		return 128 + (sigNum ?? 0);
+		return SIGNAL_EXIT_OFFSET + (sigNum ?? 0);
 	}
 
 	return result.status ?? 1;

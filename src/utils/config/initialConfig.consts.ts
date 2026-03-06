@@ -1,4 +1,4 @@
-import type { Config } from '../types/Config/index.js';
+import type { Config } from '../../types/Config/index.js';
 
 export const INITIAL_CONFIG: Config = {
 	version: 2,

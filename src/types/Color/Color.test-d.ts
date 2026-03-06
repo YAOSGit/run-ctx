@@ -1,5 +1,6 @@
 import { assertType, describe, expectTypeOf, it } from 'vitest';
-import { COLOR, type Color } from './index.js';
+import { COLOR } from './Color.consts.js';
+import type { Color } from './index.js';
 
 describe('Color type tests', () => {
 	it('Color is a union of color string literals', () => {

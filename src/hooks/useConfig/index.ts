@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Config } from '../../types/Config/index.js';
 import { loadConfig, saveConfig } from '../../utils/config/index.js';
+import { SAVE_DEBOUNCE_MS } from './useConfig.consts.js';
 
-export const useConfig = () => {
+export const useConfigLoader = () => {
 	const [config, setConfig] = useState<Config>(() => loadConfig());
 
 	const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -16,7 +17,7 @@ export const useConfig = () => {
 
 		saveTimeoutRef.current = setTimeout(() => {
 			saveConfig(newConfig);
-		}, 500);
+		}, SAVE_DEBOUNCE_MS);
 	}, []);
 
 	useEffect(() => {

@@ -1,6 +1,6 @@
 import type React from 'react';
 import { createContext, useContext, useMemo } from 'react';
-import { useConfig as useConfigHook } from '../../hooks/useConfig/index.js';
+import { useConfigLoader } from '../../hooks/useConfig/index.js';
 import type {
 	ConfigContextValue,
 	ConfigProviderProps,
@@ -9,7 +9,7 @@ import type {
 const ConfigContext = createContext<ConfigContextValue | null>(null);
 
 export const ConfigProvider: React.FC<ConfigProviderProps> = ({ children }) => {
-	const configState = useConfigHook();
+	const configState = useConfigLoader();
 
 	const value: ConfigContextValue = useMemo(
 		() => ({

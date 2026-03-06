@@ -1,15 +1,15 @@
 import { act, renderHook } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { useNavigation } from './index.js';
+import { useNavigationState } from './index.js';
 
 describe('useNavigation', () => {
 	it('starts at alias-list screen', () => {
-		const { result } = renderHook(() => useNavigation());
+		const { result } = renderHook(() => useNavigationState());
 		expect(result.current.screen).toEqual({ type: 'alias-list' });
 	});
 
 	it('navigates to rule-editor', () => {
-		const { result } = renderHook(() => useNavigation());
+		const { result } = renderHook(() => useNavigationState());
 
 		act(() => {
 			result.current.navigateTo({ type: 'rule-editor', aliasName: 'dev' });
@@ -22,7 +22,7 @@ describe('useNavigation', () => {
 	});
 
 	it('goBack from rule-detail returns to rule-editor', () => {
-		const { result } = renderHook(() => useNavigation());
+		const { result } = renderHook(() => useNavigationState());
 
 		act(() => {
 			result.current.navigateTo({
@@ -42,7 +42,7 @@ describe('useNavigation', () => {
 	});
 
 	it('goBack from rule-editor returns to alias-list', () => {
-		const { result } = renderHook(() => useNavigation());
+		const { result } = renderHook(() => useNavigationState());
 
 		act(() => {
 			result.current.navigateTo({ type: 'rule-editor', aliasName: 'dev' });

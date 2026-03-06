@@ -1,10 +1,6 @@
 import { Box, Text } from 'ink';
-import type React from 'react';
 import { COLOR } from '../../types/Color/index.js';
-
-type StatusBarProps = {
-	children: React.ReactNode;
-};
+import type { StatusBarProps } from './StatusBar.types.js';
 
 export function StatusBar({ children }: StatusBarProps) {
 	return (

@@ -1,11 +1,9 @@
 import { useCallback, useState } from 'react';
+import type { Screen } from './useNavigation.types.js';
 
-export type Screen =
-	| { type: 'alias-list' }
-	| { type: 'rule-editor'; aliasName: string }
-	| { type: 'rule-detail'; aliasName: string; ruleIndex: number };
+export type { Screen };
 
-export const useNavigation = () => {
+export const useNavigationState = () => {
 	const [screen, setScreen] = useState<Screen>({ type: 'alias-list' });
 
 	const navigateTo = useCallback((target: Screen) => {

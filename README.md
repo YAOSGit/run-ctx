@@ -443,6 +443,76 @@ This format allows you to quickly identify both the major version and the year o
 
 ---
 
+## Style Guide
+
+Conventions for contributing to this project. All rules are enforced by code review; Biome handles formatting and lint.
+
+### Exports
+
+- **Named exports only** — no `export default`. Every module uses `export function`, `export const`, or `export type`.
+- **`import type`** — always use `import type` for type-only imports.
+- **`.js` extensions** — all relative imports use explicit `.js` extensions (ESM requirement).
+
+### File Structure
+
+```
+src/
+├── app/              # Entry points, root component, providers wrapper
+├── components/       # React components (PascalCase directories)
+│   └── MyComponent/
+│       ├── index.tsx
+│       ├── MyComponent.types.ts
+│       └── MyComponent.test.tsx
+├── hooks/            # Custom hooks (camelCase directories)
+│   └── useMyHook/
+│       ├── index.ts
+│       ├── useMyHook.types.ts
+│       └── useMyHook.test.tsx
+├── providers/        # React context providers (PascalCase directories)
+│   └── MyProvider/
+│       ├── index.tsx
+│       ├── MyProvider.types.ts
+│       └── MyProvider.test.tsx
+├── types/            # Shared type definitions (PascalCase directories)
+│   └── MyType/
+│       ├── index.ts
+│       └── MyType.test-d.ts
+└── utils/            # Pure utility functions (camelCase directories)
+    └── myUtil/
+        ├── index.ts
+        └── myUtil.test.ts
+```
+
+### Components & Providers
+
+- **Components** use `function` declarations: `export function MyComponent(props: MyComponentProps) {}`
+- **Providers** use `React.FC` arrow syntax: `export const MyProvider: React.FC<Props> = ({ children }) => {}`
+- **Props** are defined in a co-located `.types.ts` file using the `interface` keyword.
+- Components receive data via props — never read `process.stdout` or global state directly.
+
+### Types
+
+- Use `type` for data shapes and unions. Use `interface` for component props.
+- Shared types live in `src/types/TypeName/index.ts` with a co-located `TypeName.test-d.ts`.
+- Local types live in co-located `.types.ts` files — never inline in implementation files.
+- No duplicate type definitions — import from the canonical source.
+- Runtime constants must not live in `src/types/` — use `.consts.ts` files.
+
+### Constants
+
+- Named constants go in `.consts.ts` files (e.g., `useMyHook.consts.ts`).
+- No magic numbers in implementation files — extract to named constants.
+
+### Testing
+
+- Every module has a co-located test file.
+- Components: `ComponentName.test.tsx`
+- Hooks: `hookName.test.tsx`
+- Utils: `utilName.test.ts`
+- Types: `TypeName.test-d.ts` (type-level tests using `expectTypeOf`/`assertType`)
+
+---
+
 ## License
 
 ISC

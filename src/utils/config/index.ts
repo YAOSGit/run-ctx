@@ -1,8 +1,8 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { INITIAL_CONFIG } from '../../app/initialConfig.js';
 import type { Config } from '../../types/Config/index.js';
+import { INITIAL_CONFIG } from './initialConfig.consts.js';
 
 const DEFAULT_CONFIG: Config = { version: 2, aliases: {} };
 

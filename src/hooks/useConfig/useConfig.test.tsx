@@ -7,7 +7,7 @@ vi.mock('../../utils/config/index.js', () => ({
 }));
 
 import { loadConfig, saveConfig } from '../../utils/config/index.js';
-import { useConfig } from './index.js';
+import { useConfigLoader } from './index.js';
 
 describe('useConfig', () => {
 	beforeEach(() => {
@@ -23,12 +23,12 @@ describe('useConfig', () => {
 		const mockConfig = { aliases: { dev: { rules: [] } } };
 		vi.mocked(loadConfig).mockReturnValue(mockConfig);
 
-		const { result } = renderHook(() => useConfig());
+		const { result } = renderHook(() => useConfigLoader());
 		expect(result.current.config).toEqual(mockConfig);
 	});
 
 	it('saves config and updates state', () => {
-		const { result } = renderHook(() => useConfig());
+		const { result } = renderHook(() => useConfigLoader());
 		const newConfig = { aliases: { test: { rules: [] } } };
 
 		act(() => {
