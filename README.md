@@ -1,4 +1,12 @@
-<h1 align="center">Yet another Open Source run-ctx</h1>
+<p align="center">
+  <a href="https://github.com/YAOSGit/run-ctx">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/YAOSGit/.github/main/profile/images/run-ctx.svg">
+      <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/YAOSGit/.github/main/profile/images/run-ctx-light.svg">
+      <img src="https://raw.githubusercontent.com/YAOSGit/.github/main/profile/images/run-ctx.svg" width="100%" alt="run-ctx" />
+    </picture>
+  </a>
+</p>
 
 <p align="center">
   <strong>Context-aware command aliasing for your terminal — run the right command based on cwd, files, and env vars</strong>
