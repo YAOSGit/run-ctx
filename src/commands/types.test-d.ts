@@ -22,15 +22,15 @@ describe('RunCtxDeps', () => {
 });
 
 describe('RunCtxCommand', () => {
-	it('has key property', () => {
-		expectTypeOf<RunCtxCommand>().toHaveProperty('key');
+	it('has id property', () => {
+		expectTypeOf<RunCtxCommand>().toHaveProperty('id');
 	});
 
-	it('has action function', () => {
-		expectTypeOf<RunCtxCommand>().toHaveProperty('action');
+	it('has execute function', () => {
+		expectTypeOf<RunCtxCommand>().toHaveProperty('execute');
 	});
 
-	it('has label property', () => {
-		expectTypeOf<RunCtxCommand>().toHaveProperty('label');
+	it('has keys property', () => {
+		expectTypeOf<RunCtxCommand>().toHaveProperty('keys');
 	});
 });

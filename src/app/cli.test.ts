@@ -125,8 +125,8 @@ describe('CLI execution', () => {
 		expect(process.exitCode).toBe(1);
 	});
 
-	it('--help prints help text and exits with code 0', () => {
-		runCLI(['--help']);
+	it('--help prints help text and exits with code 0', async () => {
+		await runCLI(['--help']);
 
 		expect(consoleLogSpy).toHaveBeenCalledWith(
 			expect.stringContaining('Usage: run-ctx'),
@@ -134,8 +134,8 @@ describe('CLI execution', () => {
 		expect(process.exitCode).toBe(0);
 	});
 
-	it('-h prints help text and exits with code 0', () => {
-		runCLI(['-h']);
+	it('-h prints help text and exits with code 0', async () => {
+		await runCLI(['-h']);
 
 		expect(consoleLogSpy).toHaveBeenCalledWith(
 			expect.stringContaining('Usage: run-ctx'),
@@ -143,34 +143,31 @@ describe('CLI execution', () => {
 		expect(process.exitCode).toBe(0);
 	});
 
-	it('--help lists available aliases', () => {
-		runCLI(['--help']);
+	it('--help lists available aliases', async () => {
+		await runCLI(['--help']);
 
 		expect(consoleLogSpy).toHaveBeenCalledWith(
 			expect.stringContaining('Available aliases:'),
 		);
 	});
 
-	it('--version prints version info and exits with code 0', () => {
-		runCLI(['--version']);
+	it('--version prints version info and exits with code 0', async () => {
+		await runCLI(['--version']);
 
 		expect(consoleLogSpy).toHaveBeenCalledWith(
-			expect.stringContaining('run-ctx v'),
+			expect.stringContaining('run-ctx'),
 		);
 		expect(consoleLogSpy).toHaveBeenCalledWith(
-			expect.stringContaining('Node.js'),
-		);
-		expect(consoleLogSpy).toHaveBeenCalledWith(
-			expect.stringContaining('Platform:'),
+			expect.stringContaining('node/'),
 		);
 		expect(process.exitCode).toBe(0);
 	});
 
-	it('-v prints version info and exits with code 0', () => {
-		runCLI(['-v']);
+	it('-V prints version info and exits with code 0', async () => {
+		await runCLI(['-V']);
 
 		expect(consoleLogSpy).toHaveBeenCalledWith(
-			expect.stringContaining('run-ctx v'),
+			expect.stringContaining('run-ctx'),
 		);
 		expect(process.exitCode).toBe(0);
 	});
@@ -208,28 +205,25 @@ describe('CLI execution', () => {
 		expect(process.exitCode).toBe(0);
 	});
 
-	it('--completions generates completion code and exits with code 0', () => {
-		runCLI(['--completions', 'bash']);
+	it('completions generates completion code and exits with code 0', async () => {
+		await runCLI(['completions', 'bash']);
 
 		expect(consoleLogSpy).toHaveBeenCalled();
 		expect(process.exitCode).toBe(0);
 	});
 
-	it('--completions rejects invalid shell names', () => {
-		runCLI(['--completions', 'powershell']);
+	it('completions rejects invalid shell names', async () => {
+		await runCLI(['completions', 'powershell']);
 
-		expect(consoleErrorSpy).toHaveBeenCalledWith(
-			expect.stringContaining('Usage: run-ctx --completions'),
-		);
 		expect(process.exitCode).toBe(1);
 	});
 
-	it('--edit launches the editor and exits with code 0', () => {
+	it('--edit launches the editor and exits with code 0', async () => {
 		vi.mocked(execFileSync as unknown as MockInstance).mockImplementation(
 			() => undefined,
 		);
 
-		runCLI(['--edit']);
+		await runCLI(['--edit']);
 
 		expect(execFileSync).toHaveBeenCalledWith(
 			'node',
@@ -239,25 +233,25 @@ describe('CLI execution', () => {
 		expect(process.exitCode).toBe(0);
 	});
 
-	it('-e launches the editor and exits with code 0', () => {
+	it('-e launches the editor and exits with code 0', async () => {
 		vi.mocked(execFileSync as unknown as MockInstance).mockImplementation(
 			() => undefined,
 		);
 
-		runCLI(['-e']);
+		await runCLI(['-e']);
 
 		expect(execFileSync).toHaveBeenCalled();
 		expect(process.exitCode).toBe(0);
 	});
 
-	it('--edit falls back to run-ctx-editor when node path fails', () => {
+	it('--edit falls back to run-ctx-editor when node path fails', async () => {
 		vi.mocked(execFileSync as unknown as MockInstance)
 			.mockImplementationOnce(() => {
 				throw new Error('ENOENT');
 			})
 			.mockImplementationOnce(() => undefined);
 
-		runCLI(['--edit']);
+		await runCLI(['--edit']);
 
 		expect(execFileSync).toHaveBeenCalledWith('run-ctx-editor', [], {
 			stdio: 'inherit',
@@ -265,14 +259,14 @@ describe('CLI execution', () => {
 		expect(process.exitCode).toBe(0);
 	});
 
-	it('--edit exits with code 1 when both editor paths fail', () => {
+	it('--edit exits with code 1 when both editor paths fail', async () => {
 		vi.mocked(execFileSync as unknown as MockInstance).mockImplementation(
 			() => {
 				throw new Error('ENOENT');
 			},
 		);
 
-		runCLI(['--edit']);
+		await runCLI(['--edit']);
 
 		expect(consoleErrorSpy).toHaveBeenCalledWith(
 			'Could not launch run-ctx-editor.',

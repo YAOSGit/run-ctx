@@ -82,14 +82,14 @@ describe('CLI E2E Tests', () => {
 		it('shows help with --help', async () => {
 			const { stdout, exitCode } = await runCli(['--help']);
 			expect(exitCode).toBe(0);
-			expect(stdout).toContain('Usage: run-ctx <alias> [args...]');
+			expect(stdout).toContain('Usage: run-ctx');
 			expect(stdout).toContain('--init');
 		});
 
 		it('shows version with --version', async () => {
 			const { stdout, exitCode } = await runCli(['--version']);
 			expect(exitCode).toBe(0);
-			expect(stdout).toMatch(/run-ctx v\d+\.\d+\.\d+/);
+			expect(stdout).toMatch(/run-ctx\/\d+\.\d+\.\d+/);
 		});
 
 		it('lists aliases with --list', async () => {

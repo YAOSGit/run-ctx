@@ -28,10 +28,10 @@ export class PTYRunner extends EventEmitter {
 	async start(args: string[] = []): Promise<void> {
 		const cliPath = path.resolve(
 			import.meta.dirname,
-			'../../dist/editor-cli.js',
+			'../../dist/tui.js',
 		);
 
-		this.pty = pty.spawn('node', [cliPath, ...args], {
+		this.pty = pty.spawn(process.execPath, [cliPath, ...args], {
 			name: 'xterm-256color',
 			cols: this.options.cols ?? 80,
 			rows: this.options.rows ?? 24,

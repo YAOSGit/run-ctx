@@ -3,6 +3,19 @@ import { describe, expect, it, vi } from 'vitest';
 import type { Alias } from '../../types/Alias/index.js';
 import { RuleEditor } from './index.js';
 
+vi.mock('../../providers/UIStateProvider/index.js', () => ({
+	useUIStateContext: () => ({
+		activeOverlay: 'none',
+		setActiveOverlay: vi.fn(),
+		confirmation: null,
+		requestConfirmation: vi.fn(),
+		clearConfirmation: vi.fn(),
+		cycleFocus: vi.fn(),
+		inputActive: false,
+		setInputActive: vi.fn(),
+	}),
+}));
+
 describe('RuleEditor', () => {
 	const alias: Alias = {
 		description: 'Start dev server',

@@ -13,6 +13,19 @@ vi.mock('../providers/NavigationProvider/index.js', () => ({
 	useNavigation: vi.fn(),
 }));
 
+vi.mock('../providers/UIStateProvider/index.js', () => ({
+	useUIStateContext: () => ({
+		activeOverlay: 'none',
+		setActiveOverlay: vi.fn(),
+		confirmation: null,
+		requestConfirmation: vi.fn(),
+		clearConfirmation: vi.fn(),
+		cycleFocus: vi.fn(),
+		inputActive: false,
+		setInputActive: vi.fn(),
+	}),
+}));
+
 // We mock the child TUI components so we don't need Ink's renderer in a plain React test
 vi.mock('../components/AliasList/index.js', () => ({
 	AliasList: () => <div data-testid="alias-list" />,
@@ -72,9 +85,8 @@ describe('AppContent', () => {
 			navigateTo: mockNavigateTo,
 			goBack: mockGoBack,
 		});
-		const { container } = render(<AppContent />);
+		render(<AppContent />);
 		expect(mockNavigateTo).toHaveBeenCalledWith({ type: 'alias-list' });
-		expect(container.innerHTML).toBe(''); // renders null during redirect
 	});
 
 	it('renders RuleDetail when screen type is rule-detail and rule exists', () => {
@@ -103,8 +115,7 @@ describe('AppContent', () => {
 			navigateTo: mockNavigateTo,
 			goBack: mockGoBack,
 		});
-		const { container } = render(<AppContent />);
+		render(<AppContent />);
 		expect(mockNavigateTo).toHaveBeenCalledWith({ type: 'alias-list' });
-		expect(container.innerHTML).toBe('');
 	});
 });

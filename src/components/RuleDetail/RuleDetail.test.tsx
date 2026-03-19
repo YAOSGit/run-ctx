@@ -3,6 +3,19 @@ import { beforeEach, describe, expect, it, type Mock, vi } from 'vitest';
 import type { Rule } from '../../types/Rule/index.js';
 import { RuleDetail } from './index.js';
 
+vi.mock('../../providers/UIStateProvider/index.js', () => ({
+	useUIStateContext: () => ({
+		activeOverlay: 'none',
+		setActiveOverlay: vi.fn(),
+		confirmation: null,
+		requestConfirmation: (_msg: string, onConfirm: () => void) => { onConfirm(); },
+		clearConfirmation: vi.fn(),
+		cycleFocus: vi.fn(),
+		inputActive: false,
+		setInputActive: vi.fn(),
+	}),
+}));
+
 describe('RuleDetail', () => {
 	const rule: Rule = {
 		match: { file: 'package.json', env: 'NODE_ENV' },

@@ -1,7 +1,18 @@
+import * as pty from 'node-pty';
 import { afterEach, describe, expect, it } from 'vitest';
 import { PTYRunner } from './utils/index.js';
 
-describe('TUI Editor', () => {
+function canSpawnPTY(): boolean {
+	try {
+		const term = pty.spawn(process.execPath, ['--version'], { cols: 80, rows: 24 });
+		term.kill();
+		return true;
+	} catch {
+		return false;
+	}
+}
+
+describe.skipIf(!canSpawnPTY())('TUI Editor', () => {
 	let runner: PTYRunner;
 
 	afterEach(async () => {

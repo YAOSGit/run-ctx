@@ -3,6 +3,19 @@ import { beforeEach, describe, expect, it, type Mock, vi } from 'vitest';
 import type { Config } from '../../types/Config/index.js';
 import { AliasList } from './index.js';
 
+vi.mock('../../providers/UIStateProvider/index.js', () => ({
+	useUIStateContext: () => ({
+		activeOverlay: 'none',
+		setActiveOverlay: vi.fn(),
+		confirmation: null,
+		requestConfirmation: (_msg: string, onConfirm: () => void) => { onConfirm(); },
+		clearConfirmation: vi.fn(),
+		cycleFocus: vi.fn(),
+		inputActive: false,
+		setInputActive: vi.fn(),
+	}),
+}));
+
 describe('AliasList', () => {
 	const baseConfig: Config = {
 		aliases: {

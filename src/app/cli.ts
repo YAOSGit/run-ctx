@@ -1,4 +1,7 @@
 #!/usr/bin/env node
+import { execFileSync } from 'node:child_process';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import chalk from 'chalk';
 import { Argument } from 'commander';
 import omelette from 'omelette';
@@ -61,6 +64,11 @@ export async function runCLI(args: string[] = process.argv.slice(2)): Promise<vo
 		version: __CLI_VERSION__,
 	});
 
+	program.configureOutput({
+		writeOut: (str) => { console.log(str); },
+		writeErr: (str) => { console.error(str); },
+	});
+
 	program
 		.command('completions')
 		.description('Print shell completion script')
@@ -79,6 +87,7 @@ export async function runCLI(args: string[] = process.argv.slice(2)): Promise<vo
 		.option('--init', 'Bootstrap a new rich starter configuration')
 		.option('--dry-run', 'Show what command would run without executing')
 		.option('--shell', 'Run command in shell (allows pipe, redirect, &&)')
+		.option('-e, --edit', 'Open the interactive TUI editor')
 		.option('-v, --verbose', 'Show detailed rule evaluation logs')
 		.addHelpText(
 			'after',
@@ -92,11 +101,30 @@ export async function runCLI(args: string[] = process.argv.slice(2)): Promise<vo
 				options: {
 					list?: boolean;
 					init?: boolean;
+					edit?: boolean;
 					dryRun?: boolean;
 					shell?: boolean;
 					verbose?: boolean;
 				},
 			) => {
+				if (options.edit) {
+					const thisDir = dirname(fileURLToPath(import.meta.url));
+					const tuiPath = resolve(thisDir, 'tui.js');
+					try {
+						execFileSync('node', [tuiPath], { stdio: 'inherit' });
+						process.exitCode = 0;
+					} catch {
+						try {
+							execFileSync('run-ctx-editor', [], { stdio: 'inherit' });
+							process.exitCode = 0;
+						} catch {
+							console.error('Could not launch run-ctx-editor.');
+							process.exitCode = 1;
+						}
+					}
+					return;
+				}
+
 				if (options.list) {
 					printList(config);
 					process.exitCode = 0;

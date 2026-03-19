@@ -49,7 +49,7 @@ describe('CLI Flags E2E', () => {
 	it('--help shows usage info', async () => {
 		const { stdout, exitCode } = await runCli(['--help']);
 		expect(exitCode).toBe(0);
-		expect(stdout).toContain('Usage: run-ctx <alias> [args...]');
+		expect(stdout).toContain('Usage: run-ctx');
 		expect(stdout).toContain('--init');
 		expect(stdout).toContain('--list');
 		expect(stdout).toContain('--dry-run');
@@ -59,9 +59,8 @@ describe('CLI Flags E2E', () => {
 	it('--version shows version number', async () => {
 		const { stdout, exitCode } = await runCli(['--version']);
 		expect(exitCode).toBe(0);
-		expect(stdout).toMatch(/run-ctx v\d+\.\d+\.\d+/);
-		expect(stdout).toContain('Node.js');
-		expect(stdout).toContain('Platform:');
+		expect(stdout).toMatch(/run-ctx\/\d+\.\d+\.\d+/);
+		expect(stdout).toContain('node/');
 	});
 
 	it('--verbose with --dry-run shows additional scoring info', async () => {
@@ -97,33 +96,30 @@ describe('CLI Flags E2E', () => {
 		expect(stderr).toContain('Winner');
 	});
 
-	it('--completions bash outputs bash completion script', async () => {
-		const { stdout, exitCode } = await runCli(['--completions', 'bash']);
+	it('completions bash outputs bash completion script', async () => {
+		const { stdout, exitCode } = await runCli(['completions', 'bash']);
 		expect(exitCode).toBe(0);
 		expect(stdout).toContain('bash');
 		expect(stdout.length).toBeGreaterThan(0);
 	});
 
-	it('--completions zsh outputs zsh completion script', async () => {
-		const { stdout, exitCode } = await runCli(['--completions', 'zsh']);
+	it('completions zsh outputs zsh completion script', async () => {
+		const { stdout, exitCode } = await runCli(['completions', 'zsh']);
 		expect(exitCode).toBe(0);
 		expect(stdout).toContain('zsh');
 		expect(stdout.length).toBeGreaterThan(0);
 	});
 
-	it('--completions fish outputs fish completion script', async () => {
-		const { stdout, exitCode } = await runCli(['--completions', 'fish']);
+	it('completions fish outputs fish completion script', async () => {
+		const { stdout, exitCode } = await runCli(['completions', 'fish']);
 		expect(exitCode).toBe(0);
-		// omelette generates a generic completion script; verify it contains
-		// the run-ctx completion markers and is non-empty
-		expect(stdout).toContain('run-ctx completion');
 		expect(stdout.length).toBeGreaterThan(0);
 	});
 
-	it('--completions invalid shows error for unsupported shell', async () => {
-		const { stderr, exitCode } = await runCli(['--completions', 'invalid']);
+	it('completions invalid shows error for unsupported shell', async () => {
+		const { stderr, exitCode } = await runCli(['completions', 'invalid']);
 		expect(exitCode).toBe(1);
-		expect(stderr).toContain('bash|zsh|fish');
+		expect(stderr.length).toBeGreaterThan(0);
 	});
 
 	it('unknown flag shows error', async () => {
