@@ -7,7 +7,7 @@ import { INITIAL_CONFIG } from './initialConfig.consts.js';
 
 const DEFAULT_CONFIG: Config = { version: 2, aliases: {} };
 
-const validateConfig = (rawObj: unknown): asserts rawObj is Config => {
+const validateConfig: (rawObj: unknown) => asserts rawObj is Config = (rawObj: unknown) => {
 	if (!rawObj || typeof rawObj !== 'object') {
 		throw new Error('Config root must be an object');
 	}

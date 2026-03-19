@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import type { OverlayState, PendingConfirmation } from '@yaos-git/toolkit/types';
 
-type RunCtxOverlay = 'help';
+export type RunCtxOverlay = 'help';
 
 type UIState = {
 	overlay: RunCtxOverlay | 'none';
