@@ -9,7 +9,7 @@ type UIState = {
 	inputActive: boolean;
 };
 
-export type UseUIStateReturn = OverlayState<RunCtxOverlay> & {
+export type UseUIStateReturn = OverlayState & {
 	cycleFocus: () => void;
 	/** True while a component is capturing raw text input (e.g. creating an alias, searching). */
 	inputActive: boolean;
@@ -23,8 +23,8 @@ export function useUIState(): UseUIStateReturn {
 		inputActive: false,
 	});
 
-	const setActiveOverlay = useCallback((overlay: RunCtxOverlay | 'none') => {
-		setState((s) => ({ ...s, overlay }));
+	const setActiveOverlay = useCallback((overlay: string) => {
+		setState((s) => ({ ...s, overlay: overlay as RunCtxOverlay | 'none' }));
 	}, []);
 
 	const requestConfirmation = useCallback((message: string, onConfirm: () => void) => {
