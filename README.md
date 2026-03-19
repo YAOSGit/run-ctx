@@ -77,7 +77,7 @@ No more remembering which command goes with which project.
 
 - **Context-Aware**: Automatically detects project type via files, cwd, and env vars
 - **Specificity Scoring**: Multi-condition rules with CSS-style cascade resolution
-- **TUI Editor**: Interactive terminal UI for managing aliases and rules
+- **TUI Editor**: Interactive terminal UI with breadcrumb navigation, command footer, and confirmation dialogs
 - **Zero Config Per-Project**: One global config works across all your projects
 
 ---
@@ -86,10 +86,10 @@ No more remembering which command goes with which project.
 
 ```bash
 # Install globally from npm
-npm install -g run-ctx
+npm install -g @yaos-git/run-ctx
 
 # Or install as a dev dependency
-npm install -D run-ctx
+npm install -D @yaos-git/run-ctx
 ```
 
 ### From Source
@@ -246,29 +246,31 @@ eval "$(rc --completions bash)"
 
 ## TUI Editor
 
-Launch with `run-ctx-editor` or `run-ctx --edit`. The editor provides three screens for managing your config interactively.
+Launch with `run-ctx-editor` or `run-ctx --edit`. The editor provides three screens for managing your config interactively. A breadcrumb header shows navigation context (e.g., Aliases / Rules / Rule #3), and all keyboard shortcuts are displayed in the command footer.
+
+Selection uses a `▸` indicator. All delete operations show a confirmation dialog, and quitting the editor requires confirmation. Text input is protected from command interference -- typing characters like `h` or `d` during editing won't trigger keyboard shortcuts.
 
 ### AliasList (home screen)
 
-| Key       | Action                |
-|-----------|-----------------------|
-| Up / Down | Navigate aliases      |
-| Enter     | Edit selected alias   |
-| `n`       | Create new alias      |
-| `d`       | Delete selected alias |
-| `q` / Esc | Quit editor           |
+| Key       | Action                                   |
+|-----------|------------------------------------------|
+| Up / Down | Navigate aliases                         |
+| Enter     | Edit selected alias                      |
+| `n`       | Create new alias                         |
+| `d`       | Delete selected alias (with confirmation)|
+| `q` / Esc | Quit editor (with confirmation)          |
 
 ### RuleEditor (alias detail)
 
-| Key       | Action               |
-|-----------|----------------------|
-| Up / Down | Navigate rules       |
-| Enter     | Edit selected rule   |
-| `n`       | Add new rule         |
-| `d`       | Delete selected rule |
-| `j`       | Move rule down       |
-| `J`       | Move rule up         |
-| `q` / Esc | Back to alias list   |
+| Key       | Action                                   |
+|-----------|------------------------------------------|
+| Up / Down | Navigate rules                           |
+| Enter     | Edit selected rule                       |
+| `n`       | Add new rule                             |
+| `d`       | Delete selected rule (with confirmation) |
+| `j`       | Move rule down                           |
+| `k`       | Move rule up                             |
+| `q` / Esc | Back to alias list                       |
 
 ### RuleDetail (rule fields)
 

@@ -1,7 +1,4 @@
-import { spawnSync } from 'node:child_process';
-import os from 'node:os';
-
-const SIGNAL_EXIT_OFFSET = 128;
+import { spawnCommand } from '@yaos-git/toolkit/cli';
 
 export type ParsedCommand = {
 	program: string;
@@ -48,40 +45,16 @@ export function execute(
 ): number {
 	const isShell = options?.shell ?? false;
 
-	let program: string;
-	let args: string[];
-
 	if (isShell) {
 		const escapedPassthrough = passthroughArgs.map((a) =>
 			a.includes(' ') || a.includes('"') || a.includes("'")
 				? `"${a.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/'/g, "\\'")}"`
 				: a,
 		);
-		program = [command, ...escapedPassthrough].join(' ');
-		args = [];
-	} else {
-		const parsed = buildCommandArgs(command, passthroughArgs);
-		program = parsed.program;
-		args = parsed.args;
+		const fullCommand = [command, ...escapedPassthrough].join(' ');
+		return spawnCommand(fullCommand, [], { shell: true });
 	}
 
-	const result = spawnSync(program, args, {
-		stdio: 'inherit',
-		env: process.env,
-		cwd: process.cwd(),
-		shell: isShell,
-	});
-
-	if (result.error) {
-		console.error(`Failed to execute: ${command}`);
-		console.error(result.error.message);
-		return 1;
-	}
-
-	if (result.signal) {
-		const sigNum = os.constants.signals[result.signal];
-		return SIGNAL_EXIT_OFFSET + (sigNum ?? 0);
-	}
-
-	return result.status ?? 1;
+	const parsed = buildCommandArgs(command, passthroughArgs);
+	return spawnCommand(parsed.program, parsed.args);
 }

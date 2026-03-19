@@ -2,18 +2,19 @@ import { Box, Text, useInput } from 'ink';
 import { useState } from 'react';
 import { COLOR } from '../../types/Color/index.js';
 import type { MatchCondition, Rule } from '../../types/Rule/index.js';
-import { StatusBar } from '../StatusBar/index.js';
+import { useUIStateContext } from '../../providers/UIStateProvider/index.js';
+import { theme } from '../../theme.js';
 import { FIELDS } from './RuleDetail.consts.js';
 import type { Field, RuleDetailProps } from './RuleDetail.types.js';
 
-function getEntries(rule: Rule, field: Field): string[] {
+const getEntries = (rule: Rule, field: Field): string[] => {
 	if (field === 'command') return [rule.command];
 	const value = rule.match[field];
 	if (value === undefined) return [];
 	return Array.isArray(value) ? value : [value];
-}
+};
 
-function setEntries(rule: Rule, field: Field, entries: string[]): Rule {
+const setEntries = (rule: Rule, field: Field, entries: string[]): Rule => {
 	if (field === 'command') {
 		return { ...rule, command: entries[0] ?? '' };
 	}
@@ -27,44 +28,57 @@ function setEntries(rule: Rule, field: Field, entries: string[]): Rule {
 		newMatch[field] = filtered;
 	}
 	return { ...rule, match: newMatch };
-}
+};
 
 export function RuleDetail({ rule, onSave, onBack }: RuleDetailProps) {
+	const ui = useUIStateContext();
 	const [selectedField, setSelectedField] = useState(0);
 	const [selectedEntry, setSelectedEntry] = useState(0);
 	const [editing, setEditing] = useState(false);
+	const [isAdding, setIsAdding] = useState(false);
 	const [editValue, setEditValue] = useState('');
-	const [deleteConfirmIndex, setDeleteConfirmIndex] = useState<number | null>(
-		null,
-	);
 
 	const currentField = FIELDS[selectedField].key;
 	const entries = getEntries(rule, currentField);
 
+	const enterEdit = (value: string, adding = false) => {
+		setEditing(true);
+		setIsAdding(adding);
+		setEditValue(value);
+		ui.setInputActive(true);
+	};
+
+	const exitEdit = () => {
+		setEditing(false);
+		setIsAdding(false);
+		ui.setInputActive(false);
+	};
+
 	useInput((input, key) => {
+		if (ui.confirmation) return;
+
 		if (editing) {
 			if (key.return) {
-				const updated = [...entries];
-				updated[selectedEntry] = editValue;
-				onSave(setEntries(rule, currentField, updated));
-				setEditing(false);
+				if (isAdding) {
+					const trimmed = editValue.trim();
+					if (trimmed) {
+						const updated = [...entries, trimmed];
+						onSave(setEntries(rule, currentField, updated));
+						setSelectedEntry(updated.length - 1);
+					}
+				} else {
+					const updated = [...entries];
+					updated[selectedEntry] = editValue;
+					onSave(setEntries(rule, currentField, updated));
+				}
+				exitEdit();
 			} else if (key.escape) {
-				setEditing(false);
+				exitEdit();
 			} else if (key.backspace || key.delete) {
 				setEditValue((prev) => prev.slice(0, -1));
 			} else if (input && !key.ctrl && !key.meta) {
 				setEditValue((prev) => prev + input);
 			}
-			return;
-		}
-
-		if (deleteConfirmIndex !== null) {
-			if (input === 'y' || input === 'Y') {
-				const updated = entries.filter((_, i) => i !== deleteConfirmIndex);
-				onSave(setEntries(rule, currentField, updated));
-				setSelectedEntry(Math.max(0, deleteConfirmIndex - 1));
-			}
-			setDeleteConfirmIndex(null);
 			return;
 		}
 
@@ -89,28 +103,22 @@ export function RuleDetail({ rule, onSave, onBack }: RuleDetailProps) {
 			}
 		} else if (key.return) {
 			if (entries.length > 0) {
-				setEditing(true);
-				setEditValue(entries[selectedEntry] ?? '');
+				enterEdit(entries[selectedEntry] ?? '');
 			} else {
-				// No entries — treat Enter as add
-				const updated = [...entries, ''];
-				onSave(setEntries(rule, currentField, updated));
-				setSelectedEntry(updated.length - 1);
-				setEditing(true);
-				setEditValue('');
+				enterEdit('', true);
 			}
 		} else if (input === 'a' && currentField !== 'command') {
-			const updated = [...entries, ''];
-			onSave(setEntries(rule, currentField, updated));
-			setSelectedEntry(updated.length - 1);
-			setEditing(true);
-			setEditValue('');
+			enterEdit('', true);
 		} else if (
 			input === 'd' &&
 			currentField !== 'command' &&
 			entries.length > 0
 		) {
-			setDeleteConfirmIndex(selectedEntry);
+			ui.requestConfirmation(`Delete entry #${selectedEntry + 1}?`, () => {
+				const updated = entries.filter((_, i) => i !== selectedEntry);
+				onSave(setEntries(rule, currentField, updated));
+				setSelectedEntry(Math.max(0, selectedEntry - 1));
+			});
 		} else if (key.escape || input === 'q') {
 			onBack();
 		}
@@ -118,26 +126,22 @@ export function RuleDetail({ rule, onSave, onBack }: RuleDetailProps) {
 
 	return (
 		<Box flexDirection="column" padding={1}>
-			<Box marginBottom={1}>
-				<Text bold color={COLOR.CYAN}>
-					Edit Rule
-				</Text>
-			</Box>
-
 			{FIELDS.map((field, fieldIndex) => {
 				const isActiveField = fieldIndex === selectedField;
 				const fieldEntries = getEntries(rule, field.key);
+				const isCommandField = field.key === 'command';
+				const showSeparatorAfter = isCommandField && FIELDS.length > 1;
 
 				return (
-					<Box key={field.key} flexDirection="column" marginBottom={1}>
+					<Box key={field.key} flexDirection="column">
 						<Box>
-							<Text color={isActiveField ? COLOR.CYAN : COLOR.WHITE}>
-								{isActiveField ? '> ' : '  '}
+							<Text color={isActiveField ? theme.brand : COLOR.WHITE}>
+								{isActiveField ? '\u25b8 ' : '  '}
 								<Text bold>{field.label}: </Text>
 							</Text>
 						</Box>
 
-						{fieldEntries.length === 0 ? (
+						{fieldEntries.length === 0 && !(isActiveField && isAdding) ? (
 							<Box>
 								<Text dimColor>{'    (empty)'}</Text>
 							</Box>
@@ -145,15 +149,15 @@ export function RuleDetail({ rule, onSave, onBack }: RuleDetailProps) {
 							fieldEntries.map((entry, entryIndex) => {
 								const isActiveEntry =
 									isActiveField && entryIndex === selectedEntry;
-								const isEditing = editing && isActiveEntry;
-								const showNumber = field.key !== 'command';
+								const isEditingEntry = editing && !isAdding && isActiveEntry;
+								const showNumber = !isCommandField;
 
 								return (
 									<Box key={`${field.key}-${entryIndex}`}>
-										<Text color={isActiveEntry ? COLOR.GREEN : COLOR.WHITE}>
+										<Text color={isActiveEntry && !isAdding ? COLOR.GREEN : COLOR.WHITE}>
 											{'    '}
 											{showNumber ? `${entryIndex + 1}. ` : ''}
-											{isEditing ? (
+											{isEditingEntry ? (
 												<>
 													<Text color={COLOR.GREEN}>{editValue}</Text>
 													<Text dimColor>|</Text>
@@ -167,37 +171,33 @@ export function RuleDetail({ rule, onSave, onBack }: RuleDetailProps) {
 							})
 						)}
 
+						{isActiveField && isAdding ? (
+							<Box>
+								<Text color={COLOR.GREEN}>
+									{'    '}
+									{!isCommandField ? `${fieldEntries.length + 1}. ` : ''}
+									{editValue}
+									<Text dimColor>|</Text>
+								</Text>
+							</Box>
+						) : null}
+
 						{isActiveField && !editing ? (
 							<Text dimColor>
 								{'    '}
 								{field.hint}
 							</Text>
 						) : null}
+
+						{showSeparatorAfter ? (
+							<Box marginTop={1} marginBottom={1}>
+								<Text dimColor>{'  ────── conditions ──────'}</Text>
+							</Box>
+						) : null}
 					</Box>
 				);
 			})}
 
-			{deleteConfirmIndex !== null ? (
-				<Box marginTop={0} marginBottom={1}>
-					<Text color={COLOR.RED}>Delete condition entry </Text>
-					<Text color={COLOR.RED} bold>
-						#{deleteConfirmIndex + 1}
-					</Text>
-					<Text color={COLOR.RED}>? (y/N)</Text>
-				</Box>
-			) : null}
-
-			<StatusBar>
-				<Text bold>↑↓</Text> navigate
-				<Text dimColor> │ </Text>
-				<Text bold>Enter</Text> edit
-				<Text dimColor> │ </Text>
-				<Text bold>a</Text> add
-				<Text dimColor> │ </Text>
-				<Text bold>d</Text> delete
-				<Text dimColor> │ </Text>
-				<Text bold>Esc</Text> back
-			</StatusBar>
 		</Box>
 	);
 }

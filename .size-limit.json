@@ -3,6 +3,6 @@
 		"path": "dist/cli.js"
 	},
 	{
-		"path": "dist/editor-cli.js"
+		"path": "dist/tui.js"
 	}
 ]

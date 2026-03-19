@@ -1,13 +1,11 @@
-import * as childProcess from 'node:child_process';
-import os from 'node:os';
 import { describe, expect, it, vi } from 'vitest';
 import { buildCommandArgs, execute, parseCommand } from './index.js';
 
-vi.mock('node:child_process', () => {
-	return {
-		spawnSync: vi.fn(),
-	};
-});
+vi.mock('@yaos-git/toolkit/cli', () => ({
+	spawnCommand: vi.fn(),
+}));
+
+import { spawnCommand } from '@yaos-git/toolkit/cli';
 
 describe('executor', () => {
 	describe('parseCommand', () => {
@@ -57,72 +55,41 @@ describe('executor', () => {
 
 	describe('execute', () => {
 		it('returns exit code 0 on success', () => {
-			vi.mocked(childProcess.spawnSync).mockReturnValueOnce({
-				status: 0,
-				signal: null,
-				error: undefined,
-				pid: 123,
-				output: [],
-				stdout: '',
-				stderr: '',
-			} as unknown as childProcess.SpawnSyncReturns<string>);
+			vi.mocked(spawnCommand).mockReturnValueOnce(0);
 
 			const code = execute('echo hello', []);
 			expect(code).toBe(0);
-			expect(childProcess.spawnSync).toHaveBeenCalledWith(
-				'echo',
-				['hello'],
-				expect.any(Object),
-			);
+			expect(spawnCommand).toHaveBeenCalledWith('echo', ['hello']);
 		});
 
-		it('returns exit code 1 and logs error when command program does not exist', () => {
-			const consoleErrorSpy = vi
-				.spyOn(console, 'error')
-				.mockImplementation(() => {});
-			vi.mocked(childProcess.spawnSync).mockReturnValueOnce({
-				status: null,
-				signal: null,
-				error: new Error('ENOENT: no such file or directory'),
-				pid: 0,
-				output: [],
-				stdout: '',
-				stderr: '',
-			} as unknown as childProcess.SpawnSyncReturns<string>);
+		it('returns exit code from spawnCommand when command fails', () => {
+			vi.mocked(spawnCommand).mockReturnValueOnce(1);
 
 			const code = execute('nonexistent-binary-xyz', []);
 			expect(code).toBe(1);
-			expect(consoleErrorSpy).toHaveBeenCalledWith(
-				'Failed to execute: nonexistent-binary-xyz',
-			);
-			consoleErrorSpy.mockRestore();
 		});
 
-		it('returns signal exit code correctly when process is killed', () => {
-			vi.mocked(childProcess.spawnSync).mockReturnValueOnce({
-				status: null,
-				signal: 'SIGTERM',
-				error: undefined,
-				pid: 123,
-				output: [],
-				stdout: '',
-				stderr: '',
-			} as unknown as childProcess.SpawnSyncReturns<string>);
+		it('delegates to spawnCommand with shell option', () => {
+			vi.mocked(spawnCommand).mockReturnValueOnce(0);
+
+			const code = execute('echo hello && echo world', [], { shell: true });
+			expect(code).toBe(0);
+			expect(spawnCommand).toHaveBeenCalledWith(
+				'echo hello && echo world',
+				[],
+				{ shell: true },
+			);
+		});
+
+		it('returns signal exit code passed through from spawnCommand', () => {
+			vi.mocked(spawnCommand).mockReturnValueOnce(143); // 128 + SIGTERM(15)
 
 			const code = execute('sleep 100', []);
-			expect(code).toBe(128 + os.constants.signals.SIGTERM);
+			expect(code).toBe(143);
 		});
 
-		it('returns fallback exit code of 1 when status is null without error or signal', () => {
-			vi.mocked(childProcess.spawnSync).mockReturnValueOnce({
-				status: null,
-				signal: null,
-				error: undefined,
-				pid: 123,
-				output: [],
-				stdout: '',
-				stderr: '',
-			} as unknown as childProcess.SpawnSyncReturns<string>);
+		it('returns fallback exit code of 1 from spawnCommand', () => {
+			vi.mocked(spawnCommand).mockReturnValueOnce(1);
 
 			const code = execute('unknown-state', []);
 			expect(code).toBe(1);

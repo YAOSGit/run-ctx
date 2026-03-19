@@ -3,7 +3,13 @@ import type { Screen } from './useNavigation.types.js';
 
 export type { Screen };
 
-export const useNavigationState = () => {
+export type UseNavigationStateReturn = {
+	screen: Screen;
+	navigateTo: (target: Screen) => void;
+	goBack: () => void;
+};
+
+export const useNavigationState = (): UseNavigationStateReturn => {
 	const [screen, setScreen] = useState<Screen>({ type: 'alias-list' });
 
 	const navigateTo = useCallback((target: Screen) => {

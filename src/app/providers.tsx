@@ -1,6 +1,7 @@
 import type React from 'react';
 import { ConfigProvider } from '../providers/ConfigProvider/index.js';
 import { NavigationProvider } from '../providers/NavigationProvider/index.js';
+import { UIStateProvider } from '../providers/UIStateProvider/index.js';
 
 export interface AppProvidersProps {
 	children: React.ReactNode;
@@ -9,7 +10,9 @@ export interface AppProvidersProps {
 export const AppProviders: React.FC<AppProvidersProps> = ({ children }) => {
 	return (
 		<ConfigProvider>
-			<NavigationProvider>{children}</NavigationProvider>
+			<NavigationProvider>
+				<UIStateProvider>{children}</UIStateProvider>
+			</NavigationProvider>
 		</ConfigProvider>
 	);
 };

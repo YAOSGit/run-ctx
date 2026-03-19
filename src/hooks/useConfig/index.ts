@@ -3,7 +3,12 @@ import type { Config } from '../../types/Config/index.js';
 import { loadConfig, saveConfig } from '../../utils/config/index.js';
 import { SAVE_DEBOUNCE_MS } from './useConfig.consts.js';
 
-export const useConfigLoader = () => {
+export type UseConfigLoaderReturn = {
+	config: Config;
+	updateConfig: (newConfig: Config) => void;
+};
+
+export const useConfigLoader = (): UseConfigLoaderReturn => {
 	const [config, setConfig] = useState<Config>(() => loadConfig());
 
 	const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);

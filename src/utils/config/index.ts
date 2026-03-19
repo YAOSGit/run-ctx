@@ -1,12 +1,13 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { atomicWrite } from '@yaos-git/toolkit/cli';
 import type { Config } from '../../types/Config/index.js';
 import { INITIAL_CONFIG } from './initialConfig.consts.js';
 
 const DEFAULT_CONFIG: Config = { version: 2, aliases: {} };
 
-function validateConfig(rawObj: unknown): asserts rawObj is Config {
+const validateConfig = (rawObj: unknown): asserts rawObj is Config => {
 	if (!rawObj || typeof rawObj !== 'object') {
 		throw new Error('Config root must be an object');
 	}
@@ -64,7 +65,7 @@ function validateConfig(rawObj: unknown): asserts rawObj is Config {
 			throw new Error(`Alias "${name}" has invalid "shell" (must be boolean)`);
 		}
 	}
-}
+};
 
 export function getConfigPath(): string {
 	const configDir =
@@ -109,24 +110,17 @@ export function loadConfig(filePath?: string): Config {
 export function saveConfig(config: Config, filePath?: string): void {
 	const configPath = filePath ?? getConfigPath();
 	const dir = path.dirname(configPath);
-	const tempPath = `${configPath}.${Date.now()}.tmp`;
 
 	try {
 		if (!fs.existsSync(dir)) {
 			fs.mkdirSync(dir, { recursive: true });
 		}
-		fs.writeFileSync(tempPath, JSON.stringify(config, null, 2));
-		fs.renameSync(tempPath, configPath);
+		atomicWrite(configPath, JSON.stringify(config, null, 2));
 	} catch (error) {
 		console.error(
 			`Error saving config to ${configPath}:`,
 			error instanceof Error ? error.message : String(error),
 		);
-		try {
-			if (fs.existsSync(tempPath)) fs.unlinkSync(tempPath);
-		} catch {
-			// Ignore cleanup errors
-		}
 	}
 }
 

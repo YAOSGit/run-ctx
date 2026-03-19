@@ -233,7 +233,7 @@ describe('CLI execution', () => {
 
 		expect(execFileSync).toHaveBeenCalledWith(
 			'node',
-			[expect.stringContaining('editor-cli.js')],
+			[expect.stringContaining('tui.js')],
 			{ stdio: 'inherit' },
 		);
 		expect(process.exitCode).toBe(0);

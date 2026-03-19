@@ -1,12 +1,12 @@
 {
 	"name": "@yaos-git/run-ctx",
-	"version": "126.0.4",
-	"description": "Context-aware command alias CLI — run the right command based on cwd, files, and env vars",
+	"version": "126.1.0",
+	"description": "Context-aware command alias CLI \u2014 run the right command based on cwd, files, and env vars",
 	"main": "dist/cli.js",
 	"bin": {
 		"run-ctx": "dist/cli.js",
 		"rc": "dist/cli.js",
-		"run-ctx-editor": "dist/editor-cli.js"
+		"run-ctx-tui": "dist/tui.js"
 	},
 	"files": [
 		"dist"
@@ -26,7 +26,7 @@
 		"test:unit": "vitest run -c vitest.unit.config.ts",
 		"test:react": "vitest run -c vitest.react.config.ts",
 		"test:types": "vitest run -c vitest.type.config.ts",
-		"test:e2e": "vitest run -c vitest.e2e.config.ts",
+		"test:e2e": "npm run build && vitest run -c vitest.e2e.config.ts",
 		"coverage": "vitest run --coverage",
 		"coverage:unit": "vitest run -c vitest.unit.config.ts --coverage",
 		"coverage:react": "vitest run -c vitest.react.config.ts --coverage",
@@ -56,10 +56,11 @@
 	},
 	"license": "ISC",
 	"engines": {
-		"node": ">=18.0.0"
+		"node": ">=20"
 	},
 	"type": "module",
 	"dependencies": {
+		"@yaos-git/toolkit": "0.0.26-3-19a",
 		"chalk": "^5.6.2",
 		"commander": "^14.0.3",
 		"omelette": "^0.4.17",
@@ -67,27 +68,26 @@
 		"re2": "^1.23.3"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "^2.3.8",
-		"@inkjs/ui": "^2.0.0",
+		"@biomejs/biome": "^2.4.8",
 		"@size-limit/file": "^11.2.0",
 		"@testing-library/dom": "^10.4.1",
 		"@testing-library/react": "^16.3.0",
-		"@types/node": "^25.0.1",
+		"@types/node": "^25.5.0",
 		"@types/omelette": "^0.4.5",
 		"@types/picomatch": "^4.0.2",
 		"@types/re2": "^1.10.0",
 		"@types/react": "^19.2.7",
 		"@typescript/native-preview": "^7.0.0-dev.20251216",
-		"@vitest/coverage-v8": "^4.0.15",
+		"@vitest/coverage-v8": "^4.1.0",
 		"@yaos-git/run-tui": "^126.0.0",
 		"esbuild": "^0.27.1",
-		"ink": "^6.5.1",
+		"ink": "^6.8.0",
 		"ink-testing-library": "^4.0.0",
 		"jsdom": "^27.3.0",
 		"node-pty": "^1.0.0",
-		"react": "^19.2.3",
+		"react": "^19.2.4",
 		"size-limit": "^11.2.0",
 		"strip-ansi": "^7.1.2",
-		"vitest": "^4.0.15"
+		"vitest": "^4.1.0"
 	}
 }

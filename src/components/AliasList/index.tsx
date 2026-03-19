@@ -1,18 +1,18 @@
-import { Box, Text, useApp, useInput } from 'ink';
+import { Box, Text, useInput } from 'ink';
 import { useState } from 'react';
 import { COLOR } from '../../types/Color/index.js';
-import { StatusBar } from '../StatusBar/index.js';
+import { useUIStateContext } from '../../providers/UIStateProvider/index.js';
+import { theme } from '../../theme.js';
 import type { AliasListProps } from './AliasList.types.js';
 
 export function AliasList({ config, onSave, onEditAlias }: AliasListProps) {
-	const { exit } = useApp();
+	const ui = useUIStateContext();
 
 	const [selectedIndex, setSelectedIndex] = useState(0);
 	const [isCreating, setIsCreating] = useState(false);
 	const [newName, setNewName] = useState('');
 	const [error, setError] = useState<string | null>(null);
 
-	const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 	const [isSearching, setIsSearching] = useState(false);
 	const [searchQuery, setSearchQuery] = useState('');
 
@@ -20,7 +20,31 @@ export function AliasList({ config, onSave, onEditAlias }: AliasListProps) {
 		name.toLowerCase().includes(searchQuery.toLowerCase()),
 	);
 
+	const enterCreateMode = () => {
+		setIsCreating(true);
+		ui.setInputActive(true);
+	};
+
+	const exitCreateMode = () => {
+		setIsCreating(false);
+		setNewName('');
+		setError(null);
+		ui.setInputActive(false);
+	};
+
+	const enterSearchMode = () => {
+		setIsSearching(true);
+		ui.setInputActive(true);
+	};
+
+	const exitSearchMode = () => {
+		setIsSearching(false);
+		ui.setInputActive(false);
+	};
+
 	useInput((input, key) => {
+		if (ui.confirmation) return;
+
 		if (isCreating) {
 			if (key.return) {
 				const trimmed = newName.trim();
@@ -29,22 +53,14 @@ export function AliasList({ config, onSave, onEditAlias }: AliasListProps) {
 						setError('Alias names cannot start with a dash (-)');
 						return;
 					}
-					const newConfig = {
+					onSave({
 						...config,
-						aliases: {
-							...config.aliases,
-							[trimmed]: { rules: [] },
-						},
-					};
-					onSave(newConfig);
+						aliases: { ...config.aliases, [trimmed]: { rules: [] } },
+					});
 				}
-				setIsCreating(false);
-				setNewName('');
-				setError(null);
+				exitCreateMode();
 			} else if (key.escape) {
-				setIsCreating(false);
-				setNewName('');
-				setError(null);
+				exitCreateMode();
 			} else if (key.backspace || key.delete) {
 				setNewName((prev) => prev.slice(0, -1));
 				setError(null);
@@ -57,7 +73,7 @@ export function AliasList({ config, onSave, onEditAlias }: AliasListProps) {
 
 		if (isSearching) {
 			if (key.return || key.escape) {
-				setIsSearching(false);
+				exitSearchMode();
 			} else if (key.backspace || key.delete) {
 				setSearchQuery((prev) => prev.slice(0, -1));
 				setSelectedIndex(0);
@@ -68,44 +84,30 @@ export function AliasList({ config, onSave, onEditAlias }: AliasListProps) {
 			return;
 		}
 
-		if (deleteConfirm !== null) {
-			if (input === 'y' || input === 'Y') {
-				const { [deleteConfirm]: _, ...rest } = config.aliases;
-				onSave({ ...config, aliases: rest });
-				setSelectedIndex((prev) =>
-					Math.max(0, Math.min(prev, aliasNames.length - 2)),
-				);
-			}
-			setDeleteConfirm(null);
-			return;
-		}
-
 		if (key.upArrow) {
 			setSelectedIndex((prev) => Math.max(0, prev - 1));
 		} else if (key.downArrow) {
 			setSelectedIndex((prev) => Math.min(aliasNames.length - 1, prev + 1));
 		} else if (key.return && aliasNames.length > 0) {
-			onEditAlias(aliasNames[selectedIndex]);
+			onEditAlias(aliasNames[selectedIndex] ?? '');
 		} else if (input === 'n') {
-			setIsCreating(true);
+			enterCreateMode();
 		} else if (input === 'd' && aliasNames.length > 0) {
-			setDeleteConfirm(aliasNames[selectedIndex]);
+			const name = aliasNames[selectedIndex] ?? '';
+			ui.requestConfirmation(`Delete alias "${name}"?`, () => {
+				const { [name]: _, ...rest } = config.aliases;
+				onSave({ ...config, aliases: rest });
+				setSelectedIndex((prev) =>
+					Math.max(0, Math.min(prev, aliasNames.length - 2)),
+				);
+			});
 		} else if (input === '/') {
-			setIsSearching(true);
-		} else if (input === 'q' || key.escape) {
-			exit();
+			enterSearchMode();
 		}
 	});
 
 	return (
 		<Box flexDirection="column" padding={1}>
-			<Box marginBottom={1}>
-				<Text bold color={COLOR.CYAN}>
-					run-ctx editor
-				</Text>
-				<Text dimColor> — Manage your command aliases</Text>
-			</Box>
-
 			{isSearching ? (
 				<Box marginBottom={1}>
 					<Text color={COLOR.YELLOW}>Search: </Text>
@@ -123,15 +125,15 @@ export function AliasList({ config, onSave, onEditAlias }: AliasListProps) {
 			) : (
 				aliasNames.map((name, index) => {
 					const alias = config.aliases[name];
-					const ruleCount = alias.rules.length;
+					const ruleCount = alias?.rules.length ?? 0;
 					const isSelected = index === selectedIndex;
 
 					return (
 						<Box key={name}>
-							<Text color={isSelected ? COLOR.CYAN : undefined}>
-								{isSelected ? '> ' : '  '}
+							<Text color={isSelected ? theme.brand : undefined}>
+								{isSelected ? '\u25b8 ' : '  '}
 								<Text bold>{name}</Text>
-								{alias.description ? (
+								{alias?.description ? (
 									<Text dimColor> — {alias.description}</Text>
 								) : null}
 								<Text color={COLOR.YELLOW}>
@@ -155,27 +157,6 @@ export function AliasList({ config, onSave, onEditAlias }: AliasListProps) {
 				</Box>
 			) : null}
 
-			{deleteConfirm ? (
-				<Box marginTop={1}>
-					<Text color={COLOR.RED}>Delete alias </Text>
-					<Text color={COLOR.RED} bold>
-						{deleteConfirm}
-					</Text>
-					<Text color={COLOR.RED}>? (y/N)</Text>
-				</Box>
-			) : null}
-
-			<StatusBar>
-				<Text bold>↑↓</Text> navigate
-				<Text dimColor> │ </Text>
-				<Text bold>Enter</Text> edit
-				<Text dimColor> │ </Text>
-				<Text bold>n</Text> new
-				<Text dimColor> │ </Text>
-				<Text bold>d</Text> delete
-				<Text dimColor> │ </Text>
-				<Text bold>q</Text> quit
-			</StatusBar>
 		</Box>
 	);
 }

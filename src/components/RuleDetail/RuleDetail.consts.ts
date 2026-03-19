@@ -9,16 +9,16 @@ export const FIELDS: FieldConfig[] = [
 	{
 		key: 'file',
 		label: 'file (glob)',
-		hint: 'File pattern to check in cwd. [a]dd [d]elete [Enter]edit',
+		hint: 'File pattern to check in cwd (e.g. *.ts, src/**/*.json)',
 	},
 	{
 		key: 'cwd',
 		label: 'cwd (regex)',
-		hint: 'Regex to match against cwd path. [a]dd [d]elete [Enter]edit',
+		hint: 'Regex to match against cwd path (e.g. /my-project/)',
 	},
 	{
 		key: 'env',
 		label: 'env var',
-		hint: 'Environment variable that must be set. [a]dd [d]elete [Enter]edit',
+		hint: 'Environment variable that must be set (e.g. NODE_ENV=production)',
 	},
 ];
