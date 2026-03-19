@@ -153,7 +153,7 @@ export function RuleDetail({ rule, onSave, onBack }: RuleDetailProps) {
 								const showNumber = !isCommandField;
 
 								return (
-									<Box key={`${field.key}-${entryIndex}`}>
+									<Box key={`${field.key}-${String(entry)}`}>
 										<Text color={isActiveEntry && !isAdding ? COLOR.GREEN : COLOR.WHITE}>
 											{'    '}
 											{showNumber ? `${entryIndex + 1}. ` : ''}
