@@ -4,7 +4,10 @@ import { PTYRunner } from './utils/index.js';
 
 function canSpawnPTY(): boolean {
 	try {
-		const term = pty.spawn(process.execPath, ['--version'], { cols: 80, rows: 24 });
+		const term = pty.spawn(process.execPath, ['--version'], {
+			cols: 80,
+			rows: 24,
+		});
 		term.kill();
 		return true;
 	} catch {

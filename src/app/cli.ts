@@ -2,10 +2,16 @@
 import { execFileSync } from 'node:child_process';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import {
+	createCLI,
+	fatalError,
+	formatError,
+	getExitCode,
+	runIfMain,
+} from '@yaos-git/toolkit/cli';
 import chalk from 'chalk';
 import { Argument } from 'commander';
 import omelette from 'omelette';
-import { createCLI, fatalError, formatError, getExitCode, runIfMain } from '@yaos-git/toolkit/cli';
 import { bootstrapStarterConfig, loadConfig } from '../utils/config/index.js';
 import { execute } from '../utils/executor/index.js';
 import { findBestMatch } from '../utils/matcher/index.js';
@@ -36,7 +42,9 @@ const printList = (config: ReturnType<typeof loadConfig>): void => {
 	}
 };
 
-export async function runCLI(args: string[] = process.argv.slice(2)): Promise<void> {
+export async function runCLI(
+	args: string[] = process.argv.slice(2),
+): Promise<void> {
 	const config = loadConfig();
 	const aliasNames = Object.keys(config.aliases);
 
@@ -65,14 +73,20 @@ export async function runCLI(args: string[] = process.argv.slice(2)): Promise<vo
 	});
 
 	program.configureOutput({
-		writeOut: (str) => { console.log(str); },
-		writeErr: (str) => { console.error(str); },
+		writeOut: (str) => {
+			console.log(str);
+		},
+		writeErr: (str) => {
+			console.error(str);
+		},
 	});
 
 	program
 		.command('completions')
 		.description('Print shell completion script')
-		.addArgument(new Argument('<shell>', 'Shell type').choices(['bash', 'zsh', 'fish']))
+		.addArgument(
+			new Argument('<shell>', 'Shell type').choices(['bash', 'zsh', 'fish']),
+		)
 		.action((shell: string) => {
 			console.log(
 				// biome-ignore lint/suspicious/noExplicitAny: omelette types are incomplete
@@ -82,8 +96,14 @@ export async function runCLI(args: string[] = process.argv.slice(2)): Promise<vo
 		});
 
 	program
-		.argument('[args...]', 'Alias name (dot-notation) followed by extra arguments')
-		.option('-l, --list', 'List all aliases and matched commands for current context')
+		.argument(
+			'[args...]',
+			'Alias name (dot-notation) followed by extra arguments',
+		)
+		.option(
+			'-l, --list',
+			'List all aliases and matched commands for current context',
+		)
 		.option('--init', 'Bootstrap a new rich starter configuration')
 		.option('--dry-run', 'Show what command would run without executing')
 		.option('--shell', 'Run command in shell (allows pipe, redirect, &&)')
@@ -134,13 +154,19 @@ export async function runCLI(args: string[] = process.argv.slice(2)): Promise<vo
 				if (options.init) {
 					try {
 						const finalPath = bootstrapStarterConfig();
-						console.log(chalk.green('Successfully initialized run-ctx configuration!'));
+						console.log(
+							chalk.green('Successfully initialized run-ctx configuration!'),
+						);
 						console.log(`Created: ${chalk.cyan(finalPath)}`);
-						console.log(`Run ${chalk.yellow('run-ctx --list')} to explore your new aliases.`);
+						console.log(
+							`Run ${chalk.yellow('run-ctx --list')} to explore your new aliases.`,
+						);
 						process.exitCode = 0;
 						return;
 					} catch (err) {
-						console.error(chalk.red(formatError(err) || 'Failed to initialize config'));
+						console.error(
+							chalk.red(formatError(err) || 'Failed to initialize config'),
+						);
 						console.error('If you want to start fresh, delete it first.');
 						process.exitCode = 1;
 						return;
@@ -160,16 +186,23 @@ export async function runCLI(args: string[] = process.argv.slice(2)): Promise<vo
 						return;
 					}
 					const { alias: dryAlias, aliasName } = resolvedDry;
-					const match = findBestMatch(dryAlias.rules, process.cwd(), process.env, {
-						verbose: options.verbose,
-						aliasName,
-					});
+					const match = findBestMatch(
+						dryAlias.rules,
+						process.cwd(),
+						process.env,
+						{
+							verbose: options.verbose,
+							aliasName,
+						},
+					);
 					if (match) {
 						console.log(match.command);
 					} else if (dryAlias.fallback) {
 						console.log(dryAlias.fallback);
 					} else {
-						console.error(`No matching rule for "${aliasName}" in this context.`);
+						console.error(
+							`No matching rule for "${aliasName}" in this context.`,
+						);
 						process.exitCode = 1;
 						return;
 					}
@@ -209,7 +242,9 @@ export async function runCLI(args: string[] = process.argv.slice(2)): Promise<vo
 						process.exitCode = exitCode;
 						return;
 					} else {
-						console.error(`No matching rule for alias "${resolved.aliasName}" in this context.`);
+						console.error(
+							`No matching rule for alias "${resolved.aliasName}" in this context.`,
+						);
 						console.error(`  cwd: ${cwd}`);
 						console.error(`  rules checked: ${alias.rules.length}`);
 						process.exitCode = 1;

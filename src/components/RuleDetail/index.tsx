@@ -1,9 +1,9 @@
 import { Box, Text, useInput } from 'ink';
 import { useState } from 'react';
-import { COLOR } from '../../types/Color/index.js';
-import type { MatchCondition, Rule } from '../../types/Rule/index.js';
 import { useUIStateContext } from '../../providers/UIStateProvider/index.js';
 import { theme } from '../../theme.js';
+import { COLOR } from '../../types/Color/index.js';
+import type { MatchCondition, Rule } from '../../types/Rule/index.js';
 import { FIELDS } from './RuleDetail.consts.js';
 import type { Field, RuleDetailProps } from './RuleDetail.types.js';
 
@@ -154,7 +154,11 @@ export function RuleDetail({ rule, onSave, onBack }: RuleDetailProps) {
 
 								return (
 									<Box key={`${field.key}-${String(entry)}`}>
-										<Text color={isActiveEntry && !isAdding ? COLOR.GREEN : COLOR.WHITE}>
+										<Text
+											color={
+												isActiveEntry && !isAdding ? COLOR.GREEN : COLOR.WHITE
+											}
+										>
 											{'    '}
 											{showNumber ? `${entryIndex + 1}. ` : ''}
 											{isEditingEntry ? (
@@ -197,7 +201,6 @@ export function RuleDetail({ rule, onSave, onBack }: RuleDetailProps) {
 					</Box>
 				);
 			})}
-
 		</Box>
 	);
 }

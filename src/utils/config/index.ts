@@ -7,7 +7,9 @@ import { INITIAL_CONFIG } from './initialConfig.consts.js';
 
 const DEFAULT_CONFIG: Config = { version: 2, aliases: {} };
 
-const validateConfig: (rawObj: unknown) => asserts rawObj is Config = (rawObj: unknown) => {
+const validateConfig: (rawObj: unknown) => asserts rawObj is Config = (
+	rawObj: unknown,
+) => {
 	if (!rawObj || typeof rawObj !== 'object') {
 		throw new Error('Config root must be an object');
 	}
@@ -85,10 +87,10 @@ export function loadConfig(filePath?: string): Config {
 		const validConfig = JSON.parse(raw);
 		validateConfig(validConfig);
 
-		// If migrating from an older version, bump it seamlessly
+		// Normalize version in memory — loadConfig should be read-only.
+		// Actual migration to disk happens on the next explicit saveConfig call.
 		if (!validConfig.version || validConfig.version < 2) {
 			validConfig.version = 2;
-			saveConfig(validConfig);
 		}
 
 		return validConfig;

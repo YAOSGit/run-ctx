@@ -14,7 +14,8 @@ const PROJECT_COMMANDS: RunCtxCommand[] = [
 		helpLabel: 'Exit run-ctx editor',
 		footer: 'priority',
 		footerOrder: 99,
-		isEnabled: (deps) => notInputting(deps) && deps.screen.type === 'alias-list',
+		isEnabled: (deps) =>
+			notInputting(deps) && deps.screen.type === 'alias-list',
 		execute: (deps) => deps.onQuit(),
 	},
 	// Override toolkit help: guard against inputActive
@@ -38,7 +39,8 @@ const PROJECT_COMMANDS: RunCtxCommand[] = [
 		helpSection: 'Navigation',
 		helpLabel: 'Return to previous screen',
 		footer: 'optional',
-		isEnabled: (deps) => notInputting(deps) && deps.screen.type !== 'alias-list',
+		isEnabled: (deps) =>
+			notInputting(deps) && deps.screen.type !== 'alias-list',
 		execute: (deps) => deps.goBack(),
 	},
 
@@ -85,7 +87,8 @@ const PROJECT_COMMANDS: RunCtxCommand[] = [
 		helpSection: 'General',
 		helpLabel: 'Create a new alias',
 		footer: 'optional',
-		isEnabled: (deps) => notInputting(deps) && deps.screen.type === 'alias-list',
+		isEnabled: (deps) =>
+			notInputting(deps) && deps.screen.type === 'alias-list',
 		execute: () => {},
 	},
 	{
@@ -96,7 +99,8 @@ const PROJECT_COMMANDS: RunCtxCommand[] = [
 		helpSection: 'General',
 		helpLabel: 'Delete selected item',
 		footer: 'optional',
-		isEnabled: (deps) => notInputting(deps) && deps.screen.type === 'alias-list',
+		isEnabled: (deps) =>
+			notInputting(deps) && deps.screen.type === 'alias-list',
 		execute: () => {},
 	},
 	{
@@ -107,7 +111,8 @@ const PROJECT_COMMANDS: RunCtxCommand[] = [
 		helpSection: 'General',
 		helpLabel: 'Search aliases',
 		footer: 'optional',
-		isEnabled: (deps) => notInputting(deps) && deps.screen.type === 'alias-list',
+		isEnabled: (deps) =>
+			notInputting(deps) && deps.screen.type === 'alias-list',
 		execute: () => {},
 	},
 
@@ -120,7 +125,8 @@ const PROJECT_COMMANDS: RunCtxCommand[] = [
 		helpSection: 'General',
 		helpLabel: 'Add a new rule',
 		footer: 'optional',
-		isEnabled: (deps) => notInputting(deps) && deps.screen.type === 'rule-editor',
+		isEnabled: (deps) =>
+			notInputting(deps) && deps.screen.type === 'rule-editor',
 		execute: () => {},
 	},
 	{
@@ -131,7 +137,8 @@ const PROJECT_COMMANDS: RunCtxCommand[] = [
 		helpSection: 'General',
 		helpLabel: 'Delete selected rule',
 		footer: 'optional',
-		isEnabled: (deps) => notInputting(deps) && deps.screen.type === 'rule-editor',
+		isEnabled: (deps) =>
+			notInputting(deps) && deps.screen.type === 'rule-editor',
 		execute: () => {},
 	},
 	{
@@ -143,7 +150,8 @@ const PROJECT_COMMANDS: RunCtxCommand[] = [
 		helpLabel: 'Move rule down (j) or up (k)',
 		footer: 'priority',
 		footerOrder: 3,
-		isEnabled: (deps) => notInputting(deps) && deps.screen.type === 'rule-editor',
+		isEnabled: (deps) =>
+			notInputting(deps) && deps.screen.type === 'rule-editor',
 		execute: () => {},
 	},
 
@@ -156,7 +164,8 @@ const PROJECT_COMMANDS: RunCtxCommand[] = [
 		helpSection: 'General',
 		helpLabel: 'Add a condition entry',
 		footer: 'optional',
-		isEnabled: (deps) => notInputting(deps) && deps.screen.type === 'rule-detail',
+		isEnabled: (deps) =>
+			notInputting(deps) && deps.screen.type === 'rule-detail',
 		execute: () => {},
 	},
 	{
@@ -167,7 +176,8 @@ const PROJECT_COMMANDS: RunCtxCommand[] = [
 		helpSection: 'General',
 		helpLabel: 'Delete selected entry',
 		footer: 'optional',
-		isEnabled: (deps) => notInputting(deps) && deps.screen.type === 'rule-detail',
+		isEnabled: (deps) =>
+			notInputting(deps) && deps.screen.type === 'rule-detail',
 		execute: () => {},
 	},
 ];
@@ -175,5 +185,5 @@ const PROJECT_COMMANDS: RunCtxCommand[] = [
 const { CommandsProvider, useCommands, COMMANDS } =
 	createCommandsProvider<RunCtxDeps>(PROJECT_COMMANDS);
 
-export { CommandsProvider, useCommands, COMMANDS };
 export type { RunCtxCommand, RunCtxDeps };
+export { COMMANDS, CommandsProvider, useCommands };

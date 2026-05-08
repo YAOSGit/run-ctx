@@ -1,5 +1,5 @@
-import * as esbuild from 'esbuild';
 import { createEsbuildConfig } from '@yaos-git/toolkit/build';
+import * as esbuild from 'esbuild';
 
 const cliConfig = createEsbuildConfig({ entry: 'src/app/cli.ts' });
 const tuiConfig = createEsbuildConfig({ entry: 'src/app/tui.tsx' });

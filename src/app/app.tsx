@@ -1,6 +1,6 @@
+import { TUILayout } from '@yaos-git/toolkit/tui/components';
 import { Box, Text, useApp } from 'ink';
 import { useCallback, useEffect, useMemo } from 'react';
-import { TUILayout } from '@yaos-git/toolkit/tui/components';
 import { COMMANDS, CommandsProvider } from '../commands/index.js';
 import type { RunCtxDeps } from '../commands/types.js';
 import { AliasList } from '../components/AliasList/index.js';
@@ -83,7 +83,9 @@ export function AppContent() {
 				<AliasList
 					config={config}
 					onSave={updateConfig}
-					onEditAlias={(name) => navigateTo({ type: 'rule-editor', aliasName: name })}
+					onEditAlias={(name) =>
+						navigateTo({ type: 'rule-editor', aliasName: name })
+					}
 				/>
 			);
 			break;
@@ -98,12 +100,19 @@ export function AppContent() {
 						onSave={(updatedAlias) =>
 							updateConfig({
 								...config,
-								aliases: { ...config.aliases, [screen.aliasName]: updatedAlias },
+								aliases: {
+									...config.aliases,
+									[screen.aliasName]: updatedAlias,
+								},
 							})
 						}
 						onBack={goBack}
 						onEditRule={(index) =>
-							navigateTo({ type: 'rule-detail', aliasName: screen.aliasName, ruleIndex: index })
+							navigateTo({
+								type: 'rule-detail',
+								aliasName: screen.aliasName,
+								ruleIndex: index,
+							})
 						}
 						onRename={(oldName, newName) => {
 							const renamedAlias = config.aliases[oldName];

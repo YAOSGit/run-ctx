@@ -1,8 +1,8 @@
 import { Box, Text, useInput } from 'ink';
 import { useState } from 'react';
-import { COLOR } from '../../types/Color/index.js';
 import { useUIStateContext } from '../../providers/UIStateProvider/index.js';
 import { theme } from '../../theme.js';
+import { COLOR } from '../../types/Color/index.js';
 import type { AliasListProps } from './AliasList.types.js';
 
 export function AliasList({ config, onSave, onEditAlias }: AliasListProps) {
@@ -156,7 +156,6 @@ export function AliasList({ config, onSave, onEditAlias }: AliasListProps) {
 					{error ? <Text color={COLOR.RED}>{error}</Text> : null}
 				</Box>
 			) : null}
-
 		</Box>
 	);
 }

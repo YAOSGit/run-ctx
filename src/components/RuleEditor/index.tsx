@@ -1,8 +1,8 @@
 import { Box, Text, useInput } from 'ink';
 import { useState } from 'react';
-import { COLOR } from '../../types/Color/index.js';
 import { useUIStateContext } from '../../providers/UIStateProvider/index.js';
 import { theme } from '../../theme.js';
+import { COLOR } from '../../types/Color/index.js';
 import type { RuleEditorProps } from './RuleEditor.types.js';
 
 const formatMatchValue = (value: string | string[]): string => {
@@ -38,7 +38,10 @@ export function RuleEditor({
 	const isInRulesRange =
 		selectedIndex >= 2 && selectedIndex < alias.rules.length + 2;
 
-	const enterFieldEdit = (field: 'name' | 'description' | 'fallback', value: string) => {
+	const enterFieldEdit = (
+		field: 'name' | 'description' | 'fallback',
+		value: string,
+	) => {
 		setEditingField(field);
 		setEditValue(value);
 		ui.setInputActive(true);
@@ -190,7 +193,7 @@ export function RuleEditor({
 			</Box>
 
 			{alias.rules.length === 0 ? (
-				<Text dimColor>  No rules. Press 'n' to add one.</Text>
+				<Text dimColor> No rules. Press 'n' to add one.</Text>
 			) : (
 				alias.rules.map((rule, index) => {
 					const isSelected = index + 2 === selectedIndex;
@@ -199,9 +202,7 @@ export function RuleEditor({
 						<Box key={index} flexDirection="column" marginBottom={1}>
 							<Text color={isSelected ? theme.brand : undefined}>
 								{isSelected ? '\u25b8 ' : '  '}
-								<Text bold>
-									{rule.command || '(empty command)'}
-								</Text>
+								<Text bold>{rule.command || '(empty command)'}</Text>
 							</Text>
 							<Text dimColor>
 								{'    '}
@@ -231,7 +232,6 @@ export function RuleEditor({
 					)}
 				</Text>
 			</Box>
-
 		</Box>
 	);
 }

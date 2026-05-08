@@ -1,5 +1,8 @@
+import type {
+	OverlayState,
+	PendingConfirmation,
+} from '@yaos-git/toolkit/types';
 import { useCallback, useMemo, useState } from 'react';
-import type { OverlayState, PendingConfirmation } from '@yaos-git/toolkit/types';
 
 export type RunCtxOverlay = 'help';
 
@@ -27,9 +30,12 @@ export function useUIState(): UseUIStateReturn {
 		setState((s) => ({ ...s, overlay: overlay as RunCtxOverlay | 'none' }));
 	}, []);
 
-	const requestConfirmation = useCallback((message: string, onConfirm: () => void) => {
-		setState((s) => ({ ...s, confirmation: { message, onConfirm } }));
-	}, []);
+	const requestConfirmation = useCallback(
+		(message: string, onConfirm: () => void) => {
+			setState((s) => ({ ...s, confirmation: { message, onConfirm } }));
+		},
+		[],
+	);
 
 	const clearConfirmation = useCallback(() => {
 		setState((s) => ({ ...s, confirmation: null }));
@@ -52,6 +58,13 @@ export function useUIState(): UseUIStateReturn {
 			inputActive: state.inputActive,
 			setInputActive,
 		}),
-		[state, setActiveOverlay, requestConfirmation, clearConfirmation, cycleFocus, setInputActive],
+		[
+			state,
+			setActiveOverlay,
+			requestConfirmation,
+			clearConfirmation,
+			cycleFocus,
+			setInputActive,
+		],
 	);
 }

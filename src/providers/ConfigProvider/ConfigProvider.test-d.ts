@@ -1,5 +1,8 @@
 import { assertType, describe, expectTypeOf, it } from 'vitest';
-import type { ConfigContextValue, ConfigProviderProps } from './ConfigProvider.types.js';
+import type {
+	ConfigContextValue,
+	ConfigProviderProps,
+} from './ConfigProvider.types.js';
 
 describe('ConfigProviderProps', () => {
 	it('has children property', () => {

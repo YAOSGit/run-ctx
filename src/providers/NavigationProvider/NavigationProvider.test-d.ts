@@ -1,6 +1,9 @@
 import { describe, expectTypeOf, it } from 'vitest';
 import type { Screen } from '../../hooks/useNavigation/index.js';
-import type { NavigationContextValue, NavigationProviderProps } from './NavigationProvider.types.js';
+import type {
+	NavigationContextValue,
+	NavigationProviderProps,
+} from './NavigationProvider.types.js';
 
 describe('NavigationProviderProps', () => {
 	it('has children property', () => {
@@ -21,7 +24,9 @@ describe('NavigationContextValue', () => {
 
 	it('navigateTo accepts a Screen and returns void', () => {
 		expectTypeOf<NavigationContextValue['navigateTo']>().toBeFunction();
-		expectTypeOf<NavigationContextValue['navigateTo']>().parameter(0).toEqualTypeOf<Screen>();
+		expectTypeOf<NavigationContextValue['navigateTo']>()
+			.parameter(0)
+			.toEqualTypeOf<Screen>();
 		expectTypeOf<NavigationContextValue['navigateTo']>().returns.toBeVoid();
 	});
 

@@ -8,7 +8,9 @@ vi.mock('../../providers/UIStateProvider/index.js', () => ({
 		activeOverlay: 'none',
 		setActiveOverlay: vi.fn(),
 		confirmation: null,
-		requestConfirmation: (_msg: string, onConfirm: () => void) => { onConfirm(); },
+		requestConfirmation: (_msg: string, onConfirm: () => void) => {
+			onConfirm();
+		},
 		clearConfirmation: vi.fn(),
 		cycleFocus: vi.fn(),
 		inputActive: false,
