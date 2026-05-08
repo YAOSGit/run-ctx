@@ -1,0 +1,10 @@
+{
+	"name": "example-node",
+	"version": "1.0.0",
+	"private": true,
+	"scripts": {
+		"dev": "echo 'Node dev server running'",
+		"build": "echo 'Node build complete'",
+		"test": "echo 'Node tests passed'"
+	}
+}

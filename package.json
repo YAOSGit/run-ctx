@@ -1,6 +1,6 @@
 {
 	"name": "@yaos-git/run-ctx",
-	"version": "126.1.0",
+	"version": "226.0.0",
 	"description": "Context-aware command alias CLI \u2014 run the right command based on cwd, files, and env vars",
 	"main": "dist/cli.js",
 	"bin": {

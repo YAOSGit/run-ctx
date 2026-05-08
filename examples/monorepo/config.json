@@ -1,0 +1,78 @@
+{
+	"version": 1,
+	"aliases": {
+		"dev": {
+			"description": "Start development for the current package",
+			"rules": [
+				{
+					"match": { "cwd": "packages/api", "file": "package.json" },
+					"command": "npm run dev:api"
+				},
+				{
+					"match": { "cwd": "packages/web", "file": "package.json" },
+					"command": "npm run dev:web"
+				},
+				{
+					"match": { "file": "Makefile" },
+					"command": "make dev"
+				}
+			],
+			"fallback": "echo 'Navigate to a package directory first'"
+		},
+		"test": {
+			"description": "Run tests for the current context",
+			"rules": [
+				{
+					"match": { "env": "CI", "file": "package.json" },
+					"command": "npm run test:ci"
+				},
+				{
+					"match": { "cwd": "packages/api", "file": "package.json" },
+					"command": "npm run test -- --watch"
+				},
+				{
+					"match": { "cwd": "packages/web", "file": "package.json" },
+					"command": "npm run test -- --watch --ui"
+				},
+				{
+					"match": { "file": "package.json" },
+					"command": "npm test"
+				}
+			],
+			"fallback": "echo 'No test runner found'"
+		},
+		"lint": {
+			"description": "Lint the current package",
+			"rules": [
+				{
+					"match": { "file": ["package.json", "biome.json"] },
+					"command": "biome check ."
+				},
+				{
+					"match": { "file": ["package.json", ".eslintrc.json"] },
+					"command": "eslint ."
+				},
+				{ "match": { "file": "Makefile" }, "command": "make lint" }
+			],
+			"fallback": "echo 'No linter configured'"
+		},
+		"db.migrate": {
+			"description": "Run database migrations",
+			"rules": [
+				{
+					"match": { "cwd": "packages/api", "file": "drizzle.config.ts" },
+					"command": "npx drizzle-kit migrate"
+				}
+			]
+		},
+		"db.seed": {
+			"description": "Seed the database",
+			"rules": [
+				{
+					"match": { "cwd": "packages/api", "file": "drizzle.config.ts" },
+					"command": "npx tsx scripts/seed.ts"
+				}
+			]
+		}
+	}
+}
